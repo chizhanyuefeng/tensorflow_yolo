@@ -1,6 +1,5 @@
 import tensorflow as tf
 
-
 class Net(object):
     '''
     Base Net class
