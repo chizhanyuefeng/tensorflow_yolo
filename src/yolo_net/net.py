@@ -1,18 +1,19 @@
 import tensorflow as tf
-
+import utils.cfg_file_parser as cp
 class Net(object):
     '''
     Base Net class
     '''
 
-    _batch_size = 0
-    _image_size = 0
-    _momentum = 0
-    _decay = 0
+    _momentum = 0.9
     _learning_rate = 0
-    _max_objects = 0
-    _weights_decay = 0 # 权值衰减
+    _max_objects_per_image = 20
+    _weights_decay = 0.0005 # 权值衰减
     _trainable = False
+    _cfg_file_path = ''
+    _leaky_alpha = 0.1
+    classes = ["aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow", "diningtable",
+               "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
 
     def __init__(self):
         '''
@@ -20,7 +21,7 @@ class Net(object):
         '''
         pass
 
-    def _conv2d_layer(self,name,input,kernel_size,output_size,stride,activate_fc='leaky'):
+    def _conv2d_layer(self,name,input,kernel_size,filters,stride,activate_fc='leaky'):
         '''
         卷积层，采用leaky作为激活函数
         :param name:
@@ -34,8 +35,8 @@ class Net(object):
         with tf.name_scope(name):
             input_size = tf.shape(input)[3]
 
-            wights = self._variable_weights([kernel_size,input_size,output_size])
-            biases = self._variable_biases(output_size)
+            wights = self._variable_weights([kernel_size,input_size,filters])
+            biases = self._variable_biases(filters)
             conv = tf.nn.conv2d(input,wights,strides=[1,stride,stride,1],padding='SAME')
             layer_output = tf.add(conv,biases)
 
@@ -52,7 +53,7 @@ class Net(object):
 
         if name == 'leaky':
             temp_x = tf.cast(x>0,tf.float32)
-            out_put = tf.add(tf.multiply(temp_x,x),tf.multiply(1-temp_x,x)*self._weights_decay)
+            out_put = tf.add(tf.multiply(temp_x,x),tf.multiply(1-temp_x,x)*self._leaky_alpha)
         elif name == 'linear':
             out_put = x
         else:
@@ -109,6 +110,57 @@ class Net(object):
         :return:
         '''
         return tf.Variable(tf.constant(0.1,shape=shape),dtype=tf.float32)
+
+    def construct_graph(self):
+        '''
+        构建网络tensor graph
+        :return:
+        '''
+
+        net_params, train_params, net_structure_params =cp.parser_cfg_file(self._cfg_file_path)
+
+        self._batch_size = int(net_params['batch_size'])
+        self._image_size = int(net_params['image_size'])
+        self._classes_num = int(net_params['classes_num'])
+        self._cell_size = int(net_params['cell_size'])
+        self._boxes_per_cell = int(net_params['boxes_per_cell'])
+
+        self._image_input = tf.placeholder(tf.float32, shape=[None,self._image_size,self._image_size,3 ])
+        print('开始构建yolo网络...')
+        self._net_output = self._image_input
+        for i in range(len(net_structure_params)):
+            name = net_structure_params[i]['name']
+            if 'convolutional' in name:
+                filters = int(net_structure_params[i]['filters'])
+                size = int(net_structure_params[i]['size'])
+                stride = int(net_structure_params[i]['stride'])
+                pad = int(net_structure_params[i]['pad'])
+                activation = net_structure_params[i]['activation']
+                self._net_output = self._conv2d_layer(name,self._net_output,size,filters,stride,activation)
+                print('建立[%s]层，卷积核大小=[%d],个数=[%d],步长=[%d],激活函数=[%s]'%
+                      (name,size,filters,stride,activation))
+            elif 'maxpool' in name:
+                size = int(net_structure_params[i]['size'])
+                stride = int(net_structure_params[i]['stride'])
+                self._net_output = self._max_pooling_layer(name,self._net_output,size,stride)
+                print('建立[%s]层，pooling大小=[%d],步长=[%d]' %
+                      (name, size,stride))
+            elif 'connected' in name:
+                shape = tf.shape(self._net_output)
+                input_size = 1
+                for i in range(1,len(shape)):
+                    input_size = input_size* shape[i]
+                output_size = int(net_structure_params[i]['output'])
+                activation = int(net_structure_params[i]['activation'])
+                self._net_output = self._fc_layer(name,self._net_output,input_size,output_size,activation)
+                print('建立[%s]层，输入层=[%d],输出层=[%d],激活函数=[%s]'%
+                      (name, input_size,output_size, activation))
+            else:
+                print('网络配置文件出错！')
+                break
+        print('构建完网络结构！')
+
+
 
     def test(self):
         return NotImplementedError

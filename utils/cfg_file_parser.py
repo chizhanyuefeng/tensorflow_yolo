@@ -44,8 +44,8 @@ def parser_cfg_file(cfg_file):
 
 if __name__=='__main__':
     net_params, train_params, net_structure_params = parser_cfg_file('../cfg/tiny-yolo.cfg')
-    print(net_params)
-    print(train_params)
+    # print(net_params)
+    # print(train_params)
     print(net_structure_params)
 
 
