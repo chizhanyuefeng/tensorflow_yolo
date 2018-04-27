@@ -1,11 +1,9 @@
-import net
-from optparse import OptionParser
+from src.yolo_net.net import Net
 
-class YoloTinyNet(net.Net):
+class YoloTinyNet(Net):
 
     def __init__(self,net_cfg_file):
-
-        pass
+        self._cfg_file_path = net_cfg_file
 
     def test(self):
         #TODO:
@@ -20,7 +18,9 @@ class YoloTinyNet(net.Net):
         pass
 
 if __name__ =='__main__':
-    tiny = YoloTinyNet('../cfg/tiny-yolo.cfg')
+    tiny = YoloTinyNet('../../cfg/tiny-yolo.cfg')
+    tiny.construct_graph()
+    tiny.load_model('../../weights/YOLO_tiny.ckpt')
     c = [{'a':1},{'b':2}]
 
 

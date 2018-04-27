@@ -12,6 +12,7 @@ class Net(object):
     _trainable = False
     _cfg_file_path = ''
     _leaky_alpha = 0.1
+    _model_path = ''
     classes = ["aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow", "diningtable",
                "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
 
@@ -21,7 +22,7 @@ class Net(object):
         '''
         pass
 
-    def _conv2d_layer(self,name,input,kernel_size,filters,stride,activate_fc='leaky'):
+    def _conv2d_layer(self,name,input,kernel_size,channels,filters,stride,activate_fc='leaky'):
         '''
         卷积层，采用leaky作为激活函数
         :param name:
@@ -33,10 +34,9 @@ class Net(object):
         :return:
         '''
         with tf.name_scope(name):
-            input_size = tf.shape(input)[3]
 
-            wights = self._variable_weights([kernel_size,input_size,filters])
-            biases = self._variable_biases(filters)
+            wights = self._variable_weights([kernel_size,kernel_size,channels,filters])
+            biases = self._variable_biases([filters])
             conv = tf.nn.conv2d(input,wights,strides=[1,stride,stride,1],padding='SAME')
             layer_output = tf.add(conv,biases)
 
@@ -82,7 +82,17 @@ class Net(object):
 
         with tf.name_scope(name):
             weights = self._variable_weights([input_size,output_size])
-            biases = self._variable_biases(output_size)
+            biases = self._variable_biases([output_size])
+            # 如果是最后一层的卷积输出需要进行reshape
+            input_shape = input.get_shape().as_list()
+
+            if len(input_shape)>2:
+                dim = 1
+                for i in range(1,len(input_shape)):
+                    dim = dim*input_shape[i]
+                input = tf.transpose(input,[0,3,1,2])
+                # 这里reshape时候，需要使用-1，而不能使用None
+                input = tf.reshape(input,(-1,dim))
             layer_output = self._activate_func(tf.add(tf.matmul(input,weights),biases),activate_fc)
             return layer_output
 
@@ -135,23 +145,24 @@ class Net(object):
                 size = int(net_structure_params[i]['size'])
                 stride = int(net_structure_params[i]['stride'])
                 pad = int(net_structure_params[i]['pad'])
+                channels = int(net_structure_params[i]['channels'])
                 activation = net_structure_params[i]['activation']
-                self._net_output = self._conv2d_layer(name,self._net_output,size,filters,stride,activation)
+                self._net_output = self._conv2d_layer(name,self._net_output,size,channels,filters,stride,activation)
                 print('建立[%s]层，卷积核大小=[%d],个数=[%d],步长=[%d],激活函数=[%s]'%
                       (name,size,filters,stride,activation))
             elif 'maxpool' in name:
                 size = int(net_structure_params[i]['size'])
                 stride = int(net_structure_params[i]['stride'])
-                self._net_output = self._max_pooling_layer(name,self._net_output,size,stride)
+                self._net_output = self._max_pooling_layer(name,self._net_output,size,[1,stride,stride,1])
                 print('建立[%s]层，pooling大小=[%d],步长=[%d]' %
                       (name, size,stride))
             elif 'connected' in name:
-                shape = tf.shape(self._net_output)
+                shape = self._net_output.get_shape().as_list()
                 input_size = 1
-                for i in range(1,len(shape)):
-                    input_size = input_size* shape[i]
+                for j in range(1,len(shape)):
+                    input_size = input_size* shape[j]
                 output_size = int(net_structure_params[i]['output'])
-                activation = int(net_structure_params[i]['activation'])
+                activation = net_structure_params[i]['activation']
                 self._net_output = self._fc_layer(name,self._net_output,input_size,output_size,activation)
                 print('建立[%s]层，输入层=[%d],输出层=[%d],激活函数=[%s]'%
                       (name, input_size,output_size, activation))
@@ -160,6 +171,12 @@ class Net(object):
                 break
         print('构建完网络结构！')
 
+    def load_model(self,model_file):
+        self._model_path = model_file
+        with tf.Session() as sess:
+            sess.run(tf.initialize_all_variables())
+            self._model_saver = tf.train.Saver()
+            self._model_saver.restore(sess,self._model_path)
 
 
     def test(self):
