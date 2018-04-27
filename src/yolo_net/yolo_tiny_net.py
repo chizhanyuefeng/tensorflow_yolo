@@ -1,11 +1,11 @@
 import net
-import configparser as cp
+from optparse import OptionParser
+
 class YoloTinyNet(net.Net):
 
     def __init__(self,net_cfg_file):
-        cfg = cp.ConfigParser(net_cfg_file)
-        print(cfg)
 
+        pass
 
     def test(self):
         #TODO:
@@ -19,9 +19,9 @@ class YoloTinyNet(net.Net):
         # TODO:
         pass
 
-
 if __name__ =='__main__':
     tiny = YoloTinyNet('../cfg/tiny-yolo.cfg')
+    c = [{'a':1},{'b':2}]
 
 
 
