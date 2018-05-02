@@ -1,5 +1,9 @@
 import tensorflow as tf
 import utils.cfg_file_parser as cp
+from tensorflow.python import pywrap_tensorflow
+
+WIGHTS_NAME = 0
+
 class Net(object):
     '''
     Base Net class
@@ -33,14 +37,19 @@ class Net(object):
         :param activate_fc:
         :return:
         '''
-        with tf.name_scope(name):
-
-            wights = self._variable_weights([kernel_size,kernel_size,channels,filters])
+        if WIGHTS_NAME:
+            with tf.name_scope(name):
+                wights = self._variable_weights([kernel_size,kernel_size,channels,filters])
+                biases = self._variable_biases([filters])
+                conv = tf.nn.conv2d(input,wights,strides=[1,stride,stride,1],padding='SAME')
+                layer_output = tf.add(conv,biases)
+        else:
+            wights = self._variable_weights([kernel_size, kernel_size, channels, filters])
             biases = self._variable_biases([filters])
-            conv = tf.nn.conv2d(input,wights,strides=[1,stride,stride,1],padding='SAME')
-            layer_output = tf.add(conv,biases)
+            conv = tf.nn.conv2d(input, wights, strides=[1, stride, stride, 1], padding='SAME')
+            layer_output = tf.add(conv, biases)
 
-            return self._activate_func(layer_output,activate_fc)
+        return self._activate_func(layer_output, activate_fc)
 
     def _activate_func(self,x,name):
         '''
@@ -79,22 +88,37 @@ class Net(object):
         :param name:
         :return:
         '''
+        if WIGHTS_NAME:
+            with tf.name_scope(name):
+                weights = self._variable_weights([input_size,output_size])
+                biases = self._variable_biases([output_size])
+                # 如果是最后一层的卷积输出需要进行reshape
+                input_shape = input.get_shape().as_list()
 
-        with tf.name_scope(name):
-            weights = self._variable_weights([input_size,output_size])
+                if len(input_shape)>2:
+                    dim = 1
+                    for i in range(1,len(input_shape)):
+                        dim = dim*input_shape[i]
+                    input = tf.transpose(input,[0,3,1,2])
+                    # 这里reshape时候，需要使用-1，而不能使用None
+                    input = tf.reshape(input,(-1,dim))
+                layer_output = self._activate_func(tf.add(tf.matmul(input,weights),biases),activate_fc)
+        else:
+            weights = self._variable_weights([input_size, output_size])
             biases = self._variable_biases([output_size])
             # 如果是最后一层的卷积输出需要进行reshape
             input_shape = input.get_shape().as_list()
 
-            if len(input_shape)>2:
+            if len(input_shape) > 2:
                 dim = 1
-                for i in range(1,len(input_shape)):
-                    dim = dim*input_shape[i]
-                input = tf.transpose(input,[0,3,1,2])
+                for i in range(1, len(input_shape)):
+                    dim = dim * input_shape[i]
+                input = tf.transpose(input, [0, 3, 1, 2])
                 # 这里reshape时候，需要使用-1，而不能使用None
-                input = tf.reshape(input,(-1,dim))
-            layer_output = self._activate_func(tf.add(tf.matmul(input,weights),biases),activate_fc)
-            return layer_output
+                input = tf.reshape(input, (-1, dim))
+            layer_output = self._activate_func(tf.add(tf.matmul(input, weights), biases), activate_fc)
+
+        return layer_output
 
     def _variable_weights(self,shape):
         '''
@@ -145,7 +169,8 @@ class Net(object):
                 size = int(net_structure_params[i]['size'])
                 stride = int(net_structure_params[i]['stride'])
                 pad = int(net_structure_params[i]['pad'])
-                channels = int(net_structure_params[i]['channels'])
+                #channels = int(net_structure_params[i]['channels'])
+                channels = self._net_output.get_shape().as_list()[3]
                 activation = net_structure_params[i]['activation']
                 self._net_output = self._conv2d_layer(name,self._net_output,size,channels,filters,stride,activation)
                 print('建立[%s]层，卷积核大小=[%d],个数=[%d],步长=[%d],激活函数=[%s]'%
@@ -172,12 +197,19 @@ class Net(object):
         print('构建完网络结构！')
 
     def load_model(self,model_file):
+
+        reader = pywrap_tensorflow.NewCheckpointReader(model_file)
+        var_to_shape_map = reader.get_variable_to_shape_map()
+        # Print tensor name and values
+        for key in var_to_shape_map:
+            print("tensor_name: ", key)
+            #print(reader.get_tensor(key))
+
         self._model_path = model_file
         with tf.Session() as sess:
-            sess.run(tf.initialize_all_variables())
+            sess.run(tf.global_variables_initializer())
             self._model_saver = tf.train.Saver()
             self._model_saver.restore(sess,self._model_path)
-
 
     def test(self):
         return NotImplementedError

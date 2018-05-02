@@ -21,7 +21,7 @@ if __name__ =='__main__':
     tiny = YoloTinyNet('../../cfg/tiny-yolo.cfg')
     tiny.construct_graph()
     tiny.load_model('../../weights/YOLO_tiny.ckpt')
-    c = [{'a':1},{'b':2}]
+
 
 
 
