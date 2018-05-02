@@ -1,5 +1,7 @@
 import tensorflow as tf
 import utils.cfg_file_parser as cp
+import time
+import cv2
 from tensorflow.python import pywrap_tensorflow
 
 WIGHTS_NAME = 0
@@ -24,7 +26,11 @@ class Net(object):
         '''
         构建网络
         '''
-        pass
+        self._sess = None
+
+    def __del__(self):
+        if self._sess!=None:
+            self._sess.close()
 
     def _conv2d_layer(self,name,input,kernel_size,channels,filters,stride,activate_fc='leaky'):
         '''
@@ -198,21 +204,31 @@ class Net(object):
 
     def load_model(self,model_file):
 
-        reader = pywrap_tensorflow.NewCheckpointReader(model_file)
-        var_to_shape_map = reader.get_variable_to_shape_map()
-        # Print tensor name and values
-        for key in var_to_shape_map:
-            print("tensor_name: ", key)
-            #print(reader.get_tensor(key))
+        # 用来打印model的变量名字和数据
+        # reader = pywrap_tensorflow.NewCheckpointReader(model_file)
+        # var_to_shape_map = reader.get_variable_to_shape_map()
+        # for key in var_to_shape_map:
+        #     print("tensor_name: ", key)
+        #     print(reader.get_tensor(key))
 
         self._model_path = model_file
-        with tf.Session() as sess:
-            sess.run(tf.global_variables_initializer())
-            self._model_saver = tf.train.Saver()
-            self._model_saver.restore(sess,self._model_path)
+        #self.__get_session().run(tf.global_variables_initializer())
+        self._model_saver = tf.train.Saver()
+        self._model_saver.restore(self.__get_session(),self._model_path)
 
-    def test(self):
-        return NotImplementedError
+    def test(self,image_path):
+        start = time.time()
+        image = cv2.imread(image_path)
+        resize_image = cv2.resize(image,(self._image_size,self._image_size)).reshape([1,self._image_size,self._image_size,3])
+        output = self.__get_session().run(self._net_output,feed_dict={self._image_input:resize_image})
+        during = str(time.time() - start)
+        print('耗时=',during,',输出结果为：',output.shape)
+
+    def __get_session(self):
+        if self._sess==None:
+            self._sess = tf.Session()
+        return self._sess
+
 
     def train(self):
         return NotImplementedError
