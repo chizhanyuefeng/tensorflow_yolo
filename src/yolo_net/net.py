@@ -32,6 +32,12 @@ class Net(object):
         if self._sess!=None:
             self._sess.close()
 
+
+    def __get_session(self):
+        if self._sess==None:
+            self._sess = tf.Session()
+        return self._sess
+
     def _conv2d_layer(self,name,input,kernel_size,channels,filters,stride,activate_fc='leaky'):
         '''
         卷积层，采用leaky作为激活函数
@@ -223,12 +229,6 @@ class Net(object):
         output = self.__get_session().run(self._net_output,feed_dict={self._image_input:resize_image})
         during = str(time.time() - start)
         print('耗时=',during,',输出结果为：',output.shape)
-
-    def __get_session(self):
-        if self._sess==None:
-            self._sess = tf.Session()
-        return self._sess
-
 
     def train(self):
         return NotImplementedError

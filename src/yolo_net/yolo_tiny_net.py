@@ -3,7 +3,7 @@ from src.yolo_net.net import Net
 class YoloTinyNet(Net):
 
     def __init__(self,net_cfg_file):
-        self._sess = None
+        super(YoloTinyNet,self).__init__()
         self._cfg_file_path = net_cfg_file
 
     def train(self):
