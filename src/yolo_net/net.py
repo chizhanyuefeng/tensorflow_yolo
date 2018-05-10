@@ -1,7 +1,10 @@
-import tensorflow as tf
-import utils.cfg_file_parser as cp
+
 import time
 import cv2
+import numpy as np
+import tensorflow as tf
+import utils.cfg_file_parser as cp
+
 from tensorflow.python import pywrap_tensorflow
 
 WIGHTS_NAME = 0
@@ -31,7 +34,6 @@ class Net(object):
     def __del__(self):
         if self._sess!=None:
             self._sess.close()
-
 
     def __get_session(self):
         if self._sess==None:
@@ -170,6 +172,8 @@ class Net(object):
         self._classes_num = int(net_params['classes_num'])
         self._cell_size = int(net_params['cell_size'])
         self._boxes_per_cell = int(net_params['boxes_per_cell'])
+        self._iou_threshold = float(net_params['iou_threshold'])
+        self._score_threshold = float(net_params['score_threshold'])
 
         self._image_input = tf.placeholder(tf.float32, shape=[None,self._image_size,self._image_size,3 ])
         print('开始构建yolo网络...')
@@ -208,7 +212,7 @@ class Net(object):
                 break
         print('构建完网络结构！')
 
-    def load_model(self,model_file):
+    def load_model(self):
 
         # 用来打印model的变量名字和数据
         # reader = pywrap_tensorflow.NewCheckpointReader(model_file)
@@ -217,18 +221,51 @@ class Net(object):
         #     print("tensor_name: ", key)
         #     print(reader.get_tensor(key))
 
-        self._model_path = model_file
         #self.__get_session().run(tf.global_variables_initializer())
         self._model_saver = tf.train.Saver()
         self._model_saver.restore(self.__get_session(),self._model_path)
 
     def test(self,image_path):
+        '''
+        测试图片
+        :param image_path:
+        :return:
+        '''
         start = time.time()
         image = cv2.imread(image_path)
-        resize_image = cv2.resize(image,(self._image_size,self._image_size)).reshape([1,self._image_size,self._image_size,3])
-        output = self.__get_session().run(self._net_output,feed_dict={self._image_input:resize_image})
+        resized_image = cv2.resize(image,(self._image_size,self._image_size)).reshape([1,self._image_size,self._image_size,3])
+        normaliztion_image = resized_image/255*2 -1
+        output = self.__get_session().run(self._net_output,feed_dict={self._image_input:normaliztion_image})
         during = str(time.time() - start)
-        print('耗时=',during,',输出结果为：',output.shape)
+        print('耗时=',during,',输出结果为：',output)
+        self.__interpert_output(self._net_output[0])
+
+    def __interpert_output(self,output):
+        '''
+        解析网络输出
+        :param output: shape = [1470,]
+        :return:
+        '''
+        cell_size = self._classes_num+self._boxes_per_cell*1+4*2
+        output = tf.reshape(output,[self._cell_size,self._cell_size,cell_size])
+
+        # 获取每个类的概率值,置信度，bbox
+        classes_probs = output[:,:,0:20]
+        boxes_confidence = output[:,:,20:22]
+        boxes = output[:,:,22:]
+
+        # 将每个类的概率和置信度相乘得到scores
+        confidence_scores = tf.zeros([self._cell_size,self._cell_size,2,20])
+        for i in range(2):
+            for j in range(20):
+                confidence_scores[:,:,i,:j] = boxes_confidence[:,:,i]*classes_probs[:,:,:j]
+
+        # 用于过滤数据,shape = [7,7,2,20]
+        score_filter = tf.constant(confidence_scores>=self._score_threshold,dtype=tf.bool)
+        
+
+
+
 
     def train(self):
         return NotImplementedError
