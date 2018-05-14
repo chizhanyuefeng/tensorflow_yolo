@@ -232,10 +232,11 @@ class Net(object):
         :return:
         '''
         start = time.time()
-        image = cv2.imread(image_path)
-        self._image_height,self._image_width = image.shape
+        self._image = cv2.imread(image_path)
+        self._image_height,self._image_width,_ = self._image.shape
+        #print('..?????????/',self._image_height,self._image_width)
 
-        resized_image = cv2.resize(image,(self._input_size,self._input_size))
+        resized_image = cv2.resize(self._image,(self._input_size,self._input_size))
         img_RGB = cv2.cvtColor(resized_image, cv2.COLOR_BGR2RGB)
         img_resized_np = np.asarray(img_RGB)
 
@@ -270,66 +271,124 @@ class Net(object):
         # 得分过滤器,shape = [7,7,2,20]，找到大于阈值的得分，并保存其所在位置。
         confidence_scores = tf.reshape(tf.transpose(tf.stack(confidence_scores_list),[1,2,0]),[7,7,2,20])
         score_filter = confidence_scores>=self._score_threshold
+        # filter 的shape = [N,4]，其中N为多少个符合阈值的数据，4为其数据坐在confidence_scores的每一维度数据
         filter = tf.where(score_filter)
 
-        # 根据过滤器来获得每个属性（类，bbox，score）过滤后的数据
+        # 根据过滤器来获得每个属性（类，bbox，score）过滤后的tensor
         classes_tensor = []
         filtered_boxes_tensor = []
+        filtered_cell_tensor = []
         filtered_score_tensor = []
         filter_shape = filter.get_shape().as_list()
-        if filtered_score_tensor is []:
-            print()
-        for i in range(len(filter.get_shape().as_list())):
+
+        # 如果过滤器为空，则说明什么都没有检测出来
+        if filter_shape is None:
+            return None
+
+        for i in range(len(filter_shape)):
             temp = filter[i]
             classes_tensor.append(filter[i][3])
             filtered_boxes_tensor.append(boxes[temp[0]][temp[1]][temp[2]][:])
+            filtered_cell_tensor.append([temp[0],temp[1]])
             filtered_score_tensor.append(confidences[temp[0]][temp[1]][temp[2]])
 
         # classes_tensor shape=[c],filtered_boxes_tensor shape = [c,4],filtered_score_tensor shape = [c]
-        result = self.__get_session().run([classes_tensor,filtered_boxes_tensor,filtered_score_tensor], feed_dict={self._image_input_tensor: self._image_inputs})
+        output = self.__get_session().run([classes_tensor,filtered_boxes_tensor,filtered_cell_tensor,filtered_score_tensor], feed_dict={self._image_input_tensor: self._image_inputs})
 
-        result_classes = []# result_classes = np.array(result[0])
-        result_boxes = []# result_boxes = np.array(result[1])
-        result_scores = []# result_scores = np.array(result[2])
+        output_classes = []# result_classes = np.array(result[0])
+        output_boxes = []# result_boxes = np.array(result[1])
+        output_cell = [] # result_boxes = np.array(result[2])
+        output_scores = []# result_scores = np.array(result[3])
 
         # 数据分类
         for i in range(20):
-            temp_class = np.argwhere(np.array(result[0])==i).reshape([-1])
+            index = np.argwhere(np.array(output[0])==i).reshape([-1])
 
-            if not temp_class.any():
+            if not index.any():
                 continue
             # 每个类的类别
-            temp = np.array(result[0])[temp_class].reshape([-1])
-            result_classes.append(temp)
+            temp = np.array(output[0])[index].reshape([-1])
+            output_classes.append(temp)
             # 每个类中每个检测对象的bbox
-            temp = np.array(result[1])[temp_class].reshape([-1,4])
-            result_boxes.append(temp)
+            temp = np.array(output[1])[index].reshape([-1,4])
+            output_boxes.append(temp)
+            # 每个类中每个检测对象的bbox所在的cell
+            temp = np.array(output[2])[index].reshape([-1, 2])
+            output_cell.append(temp)
             # 每个类中的每个检测对象的得分
-            temp = np.array(result[2])[temp_class].reshape([-1])
-            result_scores.append(temp)
+            temp = np.array(output[3])[index].reshape([-1])
+            output_scores.append(temp)
 
-        for i in range(len(result_classes)):
-            self.__interpert_result(result_classes[i],result_boxes[i],result_scores[i])
+        result_classes = []
+        result_bboxes = []
+        result_scores = []
 
-    def __interpert_result(self,classes,bboxes,scores):
+        for i in range(len(output_classes)):
+            classes, bboxes, scores=self.__interpert_result(output_classes[i],output_boxes[i],output_cell[i],output_scores[i])
+            result_classes.append(classes)
+            result_bboxes.append(bboxes)
+            result_scores.append(scores)
+        print('result_bboxes',result_bboxes)
+        self.__show_result(result_bboxes[0])
+
+    def __interpert_result(self,classes,bboxes,cell,scores):
         '''
         解析输出结果的每个类的阈值
         :param classes:
         :param bboxes:
+        :param cell:
         :param scores:
         :return:
         '''
         classes = np.array(classes)
         bboxes = np.array(bboxes)
+        celles = np.array(cell)
         scores = np.array(scores)
 
         # 根据得分进行排序
-        index = np.array(np.argsort(scores))
+        index = np.argsort(scores)[::-1] # 使用[::-1]来完成将序排列，或者np.argsort(-scores)
         classes = classes[index]
         bboxes = bboxes[index]
+        celles = celles[index]
         scores = scores[index]
 
-    def iou(self,bbox1,bbox2):
+        # 通过非极大抑制，来筛选iou
+        for i in range(len(classes)):
+            if i==len(classes)-1:
+                break
+            else:
+                for j in range(i+1,len(classes)):
+                    bboxes[i] = self.__bbox_pos(celles[i],bboxes[i])
+                    bboxes[j] = self.__bbox_pos(celles[j],bboxes[j])
+                    iou = self.__iou(bboxes[i],bboxes[j])
+                    if iou>=self._iou_threshold:
+                        scores[j]=0
+        #print(bboxes)
+        return classes,bboxes,scores
+
+    def __bbox_pos(self,cell,bbox):
+        '''
+        将相对坐标转化为绝对坐标
+        :param cell:
+        :param bbox:
+        :return: bbox[left_top_x,left_top_y,right_bottom_x,right_bottom_y]
+        '''
+
+        # 计算bbox的1/2的宽度和高度
+        half_bw = self._image_width*bbox[2]/2
+        half_bh = self._image_height*bbox[3]/2
+
+        # 计算原始大小的图片每个cell的宽和高
+        cell_width = self._image_width/self._cell_size
+        cell_height = self._image_height/self._cell_size
+
+        # 计算中心坐标点
+        center_x = bbox[0]*cell_width + cell_width*cell[0]
+        center_y = bbox[1]*cell_height + cell_height*cell[1]
+
+        return [center_x-cell_width,center_y-cell_height,center_x+cell_width,center_y+cell_height]
+
+    def __iou(self,bbox1,bbox2):
         '''
         计算iou
         :param bbox1: [left_top_x,left_top_y,right_bottom_x,right_bottom_y]
@@ -341,15 +400,33 @@ class Net(object):
         bbox2_x = [bbox2[2], bbox2[0]]
         bbox2_y = [bbox2[3], bbox2[1]]
 
+        # 根据4种判断条件来确定确定是否相交
         if bbox1_x[0] <= bbox2_x[1] or bbox1_y[0] <= bbox2_y[1] or bbox1_x[1] >= bbox2_x[0] or bbox1_y[1] >= bbox2_y[0]:
             return 0
+        # 找到相交矩阵的坐标
         X = [max(bbox1_x[1], bbox2_x[1]), min(bbox1_x[0], bbox2_x[0])]
         Y = [max(bbox1_y[1], bbox2_y[1]), min(bbox1_y[0], bbox2_y[0])]
-        cross_area = float(abs(X[0]-X[1])*abs(Y[0]-Y[1]))
-        gt_area = abs(bbox1_x[0]-bbox1_x[1])*abs(bbox1_y[0]-bbox1_y[1])
-        test_area = abs(bbox2_x[0]-bbox2_x[1])*abs(bbox2_y[0]-bbox2_y[1])
 
-        return cross_area / (gt_area + test_area - cross_area)
+        # 计算交叉面积
+        cross_area = float(abs(X[0]-X[1])*abs(Y[0]-Y[1]))
+        # 计算bbox面积
+        bbox1_area = abs(bbox1_x[0]-bbox1_x[1])*abs(bbox1_y[0]-bbox1_y[1])
+        bbox2_area = abs(bbox2_x[0]-bbox2_x[1])*abs(bbox2_y[0]-bbox2_y[1])
+
+        return cross_area / (bbox1_area + bbox2_area - cross_area)
+
+    def __show_result(self,bboxes):
+        '''
+
+        :return:
+        '''
+        image = self._image.copy()
+        for i in range(len(bboxes)):
+            cv2.rectangle(image, (bboxes[i][0], bboxes[i][1]), (bboxes[i][2], bboxes[i][3]), (0, 255, 0), 2)
+
+        cv2.imshow('YOLO_tiny detection', image)
+        cv2.waitKey(10000)
+
 
     def train(self):
         return NotImplementedError
