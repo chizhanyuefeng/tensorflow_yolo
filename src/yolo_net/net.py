@@ -168,14 +168,14 @@ class Net(object):
         net_params, train_params, net_structure_params =cp.parser_cfg_file(self._cfg_file_path)
 
         self._batch_size = int(net_params['batch_size'])
-        self._image_size = int(net_params['image_size'])
+        self._input_size = int(net_params['input_size'])
         self._classes_num = int(net_params['classes_num'])
         self._cell_size = int(net_params['cell_size'])
         self._boxes_per_cell = int(net_params['boxes_per_cell'])
         self._iou_threshold = float(net_params['iou_threshold'])
         self._score_threshold = float(net_params['score_threshold'])
 
-        self._image_input_tensor = tf.placeholder(tf.float32, shape=[None,self._image_size,self._image_size,3])
+        self._image_input_tensor = tf.placeholder(tf.float32, shape=[None,self._input_size,self._input_size,3])
         print('开始构建yolo网络...')
         self._net_output = self._image_input_tensor
         for i in range(len(net_structure_params)):
@@ -233,7 +233,8 @@ class Net(object):
         '''
         start = time.time()
         image = cv2.imread(image_path)
-        resized_image = cv2.resize(image,(self._image_size,self._image_size))
+
+        resized_image = cv2.resize(image,(self._input_size,self._input_size))
         img_RGB = cv2.cvtColor(resized_image, cv2.COLOR_BGR2RGB)
         img_resized_np = np.asarray(img_RGB)
 
@@ -265,16 +266,79 @@ class Net(object):
                 temp = tf.multiply(confidences[:, :, i], classes_probs[:, :, j])
                 confidence_scores_list.append(temp)
 
-        # 得分过滤器,shape = [7,7,2,20]
+        # 得分过滤器,shape = [7,7,2,20]，找到大于阈值的得分，并保存其所在位置。
         confidence_scores = tf.reshape(tf.transpose(tf.stack(confidence_scores_list),[1,2,0]),[7,7,2,20])
         score_filter = confidence_scores>=self._score_threshold
-        boxes_filter = tf.where(score_filter)
+        filter = tf.where(score_filter)
 
-        print('confidence_scores',
-              self.__get_session().run(confidence_scores, feed_dict={self._image_input_tensor: self._image_inputs}))
+        # 根据过滤器来获得每个属性（类，bbox，score）过滤后的数据
+        classes_tensor = []
+        filtered_boxes_tensor = []
+        filtered_score_tensor = []
+        filter_shape = filter.get_shape().as_list()
+        if filtered_score_tensor is []:
+            print()
+        for i in range(len(filter.get_shape().as_list())):
+            temp = filter[i]
+            classes_tensor.append(filter[i][3])
+            filtered_boxes_tensor.append(boxes[temp[0]][temp[1]][temp[2]][:])
+            filtered_score_tensor.append(confidences[temp[0]][temp[1]][temp[2]])
 
-        print('output',
-              self.__get_session().run(output, feed_dict={self._image_input_tensor: self._image_inputs}))
+        # classes_tensor shape=[c],filtered_boxes_tensor shape = [c,4],filtered_score_tensor shape = [c]
+        result = self.__get_session().run([classes_tensor,filtered_boxes_tensor,filtered_score_tensor], feed_dict={self._image_input_tensor: self._image_inputs})
+
+        result_classes = []# result_classes = np.array(result[0])
+        result_boxes = []# result_boxes = np.array(result[1])
+        result_scores = []# result_scores = np.array(result[2])
+
+
+        # 数据分类
+        for i in range(20):
+            temp_class = np.argwhere(np.array(result[0])==i).reshape([-1])
+
+            if not temp_class.any():
+                continue
+            # 每个类的类别
+            temp = np.array(result[0])[temp_class].reshape([-1])
+            result_classes.append(temp)
+            # 每个类中每个检测对象的bbox
+            temp = np.array(result[1])[temp_class].reshape([-1,4])
+            result_boxes.append(temp)
+            # 每个类中的每个检测对象的得分
+            temp = np.array(result[2])[temp_class].reshape([-1])
+            result_scores.append(temp)
+
+        for i in range(len(result_classes)):
+            self.__interpert_result(result_classes[i],result_boxes[i],result_scores[i])
+
+
+
+    def __interpert_result(self,classes,bboxes,scores):
+        '''
+        解析输出结果的每个类的阈值
+        :param classes:
+        :param bboxes:
+        :param scores:
+        :return:
+        '''
+        classes = np.array(classes)
+        bboxes = np.array(bboxes)
+        scores = np.array(scores)
+
+        # 根据得分进行排序
+        index = np.array(np.argsort(scores))
+        classes = classes[index]
+        bboxes = bboxes[index]
+        scores = scores[index]
+
+    def __iou(self,bbox1,bbox2):
+        '''
+        计算iou
+        :param bbox1:
+        :param bbox2:
+        :return:
+        '''
+
 
 
 
