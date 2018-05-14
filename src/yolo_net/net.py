@@ -233,6 +233,7 @@ class Net(object):
         '''
         start = time.time()
         image = cv2.imread(image_path)
+        self._image_height,self._image_width = image.shape
 
         resized_image = cv2.resize(image,(self._input_size,self._input_size))
         img_RGB = cv2.cvtColor(resized_image, cv2.COLOR_BGR2RGB)
@@ -291,7 +292,6 @@ class Net(object):
         result_boxes = []# result_boxes = np.array(result[1])
         result_scores = []# result_scores = np.array(result[2])
 
-
         # 数据分类
         for i in range(20):
             temp_class = np.argwhere(np.array(result[0])==i).reshape([-1])
@@ -311,8 +311,6 @@ class Net(object):
         for i in range(len(result_classes)):
             self.__interpert_result(result_classes[i],result_boxes[i],result_scores[i])
 
-
-
     def __interpert_result(self,classes,bboxes,scores):
         '''
         解析输出结果的每个类的阈值
@@ -331,17 +329,27 @@ class Net(object):
         bboxes = bboxes[index]
         scores = scores[index]
 
-    def __iou(self,bbox1,bbox2):
+    def iou(self,bbox1,bbox2):
         '''
         计算iou
-        :param bbox1:
-        :param bbox2:
+        :param bbox1: [left_top_x,left_top_y,right_bottom_x,right_bottom_y]
+        :param bbox2:[left_top_x,left_top_y,right_bottom_x,right_bottom_y]
         :return:
         '''
+        bbox1_x = [bbox1[2], bbox1[0]]
+        bbox1_y = [bbox1[3], bbox1[1]]
+        bbox2_x = [bbox2[2], bbox2[0]]
+        bbox2_y = [bbox2[3], bbox2[1]]
 
+        if bbox1_x[0] <= bbox2_x[1] or bbox1_y[0] <= bbox2_y[1] or bbox1_x[1] >= bbox2_x[0] or bbox1_y[1] >= bbox2_y[0]:
+            return 0
+        X = [max(bbox1_x[1], bbox2_x[1]), min(bbox1_x[0], bbox2_x[0])]
+        Y = [max(bbox1_y[1], bbox2_y[1]), min(bbox1_y[0], bbox2_y[0])]
+        cross_area = float(abs(X[0]-X[1])*abs(Y[0]-Y[1]))
+        gt_area = abs(bbox1_x[0]-bbox1_x[1])*abs(bbox1_y[0]-bbox1_y[1])
+        test_area = abs(bbox2_x[0]-bbox2_x[1])*abs(bbox2_y[0]-bbox2_y[1])
 
-
-
+        return cross_area / (gt_area + test_area - cross_area)
 
     def train(self):
         return NotImplementedError
