@@ -1,6 +1,6 @@
 import numpy as np
 from src.yolo_net.net import Net
-
+import tensorflow as tf
 
 class YoloTinyNet(Net):
 
@@ -18,18 +18,32 @@ class YoloTinyNet(Net):
         pass
 
 if __name__ =='__main__':
-    # tiny = YoloTinyNet()
-    # tiny.construct_graph()
-    # tiny.load_model()
-    # tiny.test('../../data/dog.jpg')
+    tiny = YoloTinyNet()
+    tiny.construct_graph()
+    tiny.load_model()
+    tiny.test('../../data/123.jpg')
 
 
-    a = np.zeros([3,3,5])
-    a[:, :,2:3] = 1
-    b = np.ones([3,3,2])
+    # a = np.zeros([3,3])
+    # a[:,0:1] = 1
+    # print(a)
+    # b = np.nonzero(a)
+    # print(b)
 
-    c = np.multiply(a,b)
-    print(c.shape)
+    # a = tf.Variable([[0,0],[1,1]])
+    # c = tf.constant([[1],[2]])
+    #
+    # sess = tf.Session()
+    # sess.run(tf.global_variables_initializer())
+    # print(sess.run(a))
+    #
+    # b = a[:,0:1]
+    # b = tf.multiply(b,c)
+    # print(sess.run(a))
+
+
+
+
 
 
 

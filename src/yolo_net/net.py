@@ -175,9 +175,9 @@ class Net(object):
         self._iou_threshold = float(net_params['iou_threshold'])
         self._score_threshold = float(net_params['score_threshold'])
 
-        self._image_input = tf.placeholder(tf.float32, shape=[None,self._image_size,self._image_size,3 ])
+        self._image_input_tensor = tf.placeholder(tf.float32, shape=[None,self._image_size,self._image_size,3])
         print('开始构建yolo网络...')
-        self._net_output = self._image_input
+        self._net_output = self._image_input_tensor
         for i in range(len(net_structure_params)):
             name = net_structure_params[i]['name']
             if 'convolutional' in name:
@@ -233,11 +233,17 @@ class Net(object):
         '''
         start = time.time()
         image = cv2.imread(image_path)
-        resized_image = cv2.resize(image,(self._image_size,self._image_size)).reshape([1,self._image_size,self._image_size,3])
-        normaliztion_image = resized_image/255*2 -1
-        output = self.__get_session().run(self._net_output,feed_dict={self._image_input:normaliztion_image})
+        resized_image = cv2.resize(image,(self._image_size,self._image_size))
+        img_RGB = cv2.cvtColor(resized_image, cv2.COLOR_BGR2RGB)
+        img_resized_np = np.asarray(img_RGB)
+
+        normaliztion_image = img_resized_np/255.0*2.0 -1
+        input = np.zeros([1,448,448,3],np.float32)
+        input[0] = normaliztion_image
+        self._image_inputs = input
+        #output = self.__get_session().run(self._net_output,feed_dict={self._image_input:input})
         during = str(time.time() - start)
-        print('耗时=',during,',输出结果为：',output)
+        print('耗时=',during)
         self.__interpert_output(self._net_output[0])
 
     def __interpert_output(self,output):
@@ -246,23 +252,29 @@ class Net(object):
         :param output: shape = [1470,]
         :return:
         '''
-        cell_size = self._classes_num+self._boxes_per_cell*1+4*2
-        output = tf.reshape(output,[self._cell_size,self._cell_size,cell_size])
 
-        # 获取每个类的概率值,置信度，bbox
-        classes_probs = output[:,:,0:20]
-        boxes_confidence = output[:,:,20:22]
-        boxes = output[:,:,22:]
+        # 获取每个类的概率值,置信度,bbox
+        classes_probs = tf.reshape(output[0:7*7*20],[7,7,20])
+        confidences = tf.reshape(output[7*7*20:7*7*22],[7,7,2])
+        boxes = tf.reshape(output[7*7*22:],[7,7,2,4])
 
         # 将每个类的概率和置信度相乘得到scores
-        confidence_scores = tf.zeros([self._cell_size,self._cell_size,2,20])
+        confidence_scores_list = []
         for i in range(2):
             for j in range(20):
-                confidence_scores[:,:,i,:j] = boxes_confidence[:,:,i]*classes_probs[:,:,:j]
+                temp = tf.multiply(confidences[:, :, i], classes_probs[:, :, j])
+                confidence_scores_list.append(temp)
 
-        # 用于过滤数据,shape = [7,7,2,20]
-        score_filter = tf.constant(confidence_scores>=self._score_threshold,dtype=tf.bool)
-        
+        # 得分过滤器,shape = [7,7,2,20]
+        confidence_scores = tf.reshape(tf.transpose(tf.stack(confidence_scores_list),[1,2,0]),[7,7,2,20])
+        score_filter = confidence_scores>=self._score_threshold
+        boxes_filter = tf.where(score_filter)
+
+        print('confidence_scores',
+              self.__get_session().run(confidence_scores, feed_dict={self._image_input_tensor: self._image_inputs}))
+
+        print('output',
+              self.__get_session().run(output, feed_dict={self._image_input_tensor: self._image_inputs}))
 
 
 
