@@ -79,7 +79,7 @@ class Net(object):
 
         if name == 'leaky':
             temp_x = tf.cast(x>0,tf.float32)
-            out_put = tf.add(tf.multiply(temp_x,x),tf.multiply(1-temp_x,x)*self._leaky_alpha)
+            out_put = tf.add(tf.multiply(temp_x,x),tf.multiply(1-temp_x,x)*self.__leaky_alpha)
         elif name == 'linear':
             out_put = x
         else:
@@ -169,19 +169,21 @@ class Net(object):
         :param train_params:
         :return:
         '''
+        if self._trainable:
+            self.__max_objects_per_image = int(train_params['max_objects_per_image'])
+            self.__object_scale = float(train_params['object_scale'])
+            self.__noobject_scale = float(train_params['noobject_scale'])
+            self.__class_scale = float(train_params['class_scale'])
+            self.__coord_scale = float(train_params['coord_scale'])
+            self.__momentum = float(train_params['momentum'])
+            self.__weights_decay = float(train_params['weights_decay'])
+            self.__leaky_alpha = float(train_params['leaky_alpha'])
+            self.__learning_rate = float(train_params['learning_rate'])
+            self.__max_iterators = int(train_params['max_iterators'])
 
-        self.__max_objects_per_image = int(train_params['max_objects_per_image'])
-        self.__object_scale = float(train_params['object_scale'])
-        self.__noobject_scale = float(train_params['noobject_scale'])
-        self.__class_scale = float(train_params['class_scale'])
-        self.__coord_scale = float(train_params['coord_scale'])
-        self.__momentum = float(train_params['momentum'])
-        self.__weights_decay = float(train_params['weights_decay'])
-        self.__leaky_alpha = float(train_params['leaky_alpha'])
-        self.__learning_rate = float(train_params['learning_rate'])
-        self.__max_iterators = int(train_params['max_iterators'])
-
-        self.__labels = tf.placeholder(tf.float32,[None,self.__max_objects_per_image,5])
+            self.__labels = tf.placeholder(tf.float32,[None,self.__max_objects_per_image,5])
+        else:
+            self.__leaky_alpha = float(train_params['leaky_alpha'])
 
 
     def _construct_graph(self):
@@ -192,6 +194,7 @@ class Net(object):
 
         net_params, train_params, net_structure_params =cp.parser_cfg_file(self._cfg_file_path)
 
+        # 加载网络基本配置参数
         self._batch_size = int(net_params['batch_size'])
         self._input_size = int(net_params['input_size'])
         self._classes_num = int(net_params['classes_num'])
@@ -200,13 +203,15 @@ class Net(object):
         self._iou_threshold = float(net_params['iou_threshold'])
         self._score_threshold = float(net_params['score_threshold'])
 
-        if self._trainable:
-            self.__train_init(train_params)
+        # 如需进行训练，则加载训练参数
+        self.__train_init(train_params)
 
+        # 开始构建网络结构
         self._image_input_tensor = tf.placeholder(tf.float32, shape=[None,self._input_size,self._input_size,3])
         print('开始构建yolo网络...')
         self._net_output = self._image_input_tensor
 
+        # 从网络结构配置加载参数，进而构建网络
         for i in range(len(net_structure_params)):
             name = net_structure_params[i]['name']
 
@@ -219,15 +224,15 @@ class Net(object):
                 channels = self._net_output.get_shape().as_list()[3]
                 activation = net_structure_params[i]['activation']
                 self._net_output = self._conv2d_layer(name,self._net_output,size,channels,filters,stride,activation)
-                print('建立[%s]层，卷积核大小=[%d],个数=[%d],步长=[%d],激活函数=[%s]'%
-                      (name,size,filters,stride,activation))
+                print('第[%d]层：[%s]层，卷积核大小=[%d],个数=[%d],步长=[%d],激活函数=[%s]'%
+                      (i,name,size,filters,stride,activation))
 
             elif 'maxpool' in name:
                 size = int(net_structure_params[i]['size'])
                 stride = int(net_structure_params[i]['stride'])
                 self._net_output = self._max_pooling_layer(name,self._net_output,size,[1,stride,stride,1])
-                print('建立[%s]层，pooling大小=[%d],步长=[%d]' %
-                      (name, size,stride))
+                print('第[%d]层：[%s]层，pooling大小=[%d],步长=[%d]' %
+                      (i,name, size,stride))
 
             elif 'connected' in name:
                 shape = self._net_output.get_shape().as_list()
@@ -237,8 +242,8 @@ class Net(object):
                 output_size = int(net_structure_params[i]['output'])
                 activation = net_structure_params[i]['activation']
                 self._net_output = self._fc_layer(name,self._net_output,input_size,output_size,activation)
-                print('建立[%s]层，输入层=[%d],输出层=[%d],激活函数=[%s]'%
-                      (name, input_size,output_size, activation))
+                print('第[%d]层：[%s]层，输入层=[%d],输出层=[%d],激活函数=[%s]'%
+                      (i,name, input_size,output_size, activation))
             else:
                 print(self._cfg_file_path,'网络配置文件出错！')
                 return
