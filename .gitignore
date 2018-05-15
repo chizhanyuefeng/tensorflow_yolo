@@ -1,2 +1,4 @@
 .idea
 *.ckpt
+*.pyc
+__pycache__

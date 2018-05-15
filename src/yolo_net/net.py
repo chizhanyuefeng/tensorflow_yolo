@@ -306,7 +306,7 @@ class Net(object):
         # 数据分类
         for i in range(20):
             index = np.argwhere(np.array(filtered_classes)==i).reshape([-1])
-            if not index.any():
+            if index.size==0:
                 continue
             # 每个类的类别
             temp = np.array(filtered_classes)[index].reshape([-1])
@@ -331,7 +331,7 @@ class Net(object):
             result_bboxes.append(bboxes)
             result_scores.append(scores)
 
-        self.__show_result(result_bboxes[0])
+        self.__show_result(result_classes,result_bboxes,result_scores)
 
     def __interpert_result(self,classes,bboxes,cell,scores):
         '''
@@ -354,18 +354,23 @@ class Net(object):
         celles = celles[index]
         scores = scores[index]
 
+        # 将每个bbox转为绝对坐标
+        for i in range(bboxes.shape[0]):
+            bboxes[i] = self.__bbox_pos(celles[i], bboxes[i])
+
         # 通过非极大抑制，来筛选iou
         for i in range(len(classes)):
             if i==len(classes)-1:
+                # bboxes[i] = self.__bbox_pos(celles[i], bboxes[i])
                 break
             else:
                 for j in range(i+1,len(classes)):
-                    bboxes[i] = self.__bbox_pos(celles[i],bboxes[i])
-                    bboxes[j] = self.__bbox_pos(celles[j],bboxes[j])
+                    # bboxes[i] = self.__bbox_pos(celles[i],bboxes[i])
+                    # bboxes[j] = self.__bbox_pos(celles[j],bboxes[j])
                     iou = self.__iou(bboxes[i],bboxes[j])
                     if iou>=self._iou_threshold:
                         scores[j]=0
-        #print(bboxes)
+
         return classes,bboxes,scores
 
     def __bbox_pos(self,cell,bbox):
@@ -388,7 +393,7 @@ class Net(object):
         center_x = bbox[0]*cell_width + cell_width*cell[0]
         center_y = bbox[1]*cell_height + cell_height*cell[1]
 
-        return [center_x-cell_width,center_y-cell_height,center_x+cell_width,center_y+cell_height]
+        return [center_x-half_bw,center_y-half_bh,center_x+half_bw,center_y+half_bh]
 
     def __iou(self,bbox1,bbox2):
         '''
@@ -419,7 +424,7 @@ class Net(object):
 
     def __show_result(self,bboxes):
         '''
-
+        显示结果
         :return:
         '''
         image = self._image.copy()
@@ -427,7 +432,7 @@ class Net(object):
             cv2.rectangle(image, (bboxes[i][0], bboxes[i][1]), (bboxes[i][2], bboxes[i][3]), (0, 255, 0), 2)
 
         cv2.imshow('YOLO_tiny detection', image)
-        cv2.waitKey(1000)
+        cv2.waitKey(3000)
 
 
     def train(self):
