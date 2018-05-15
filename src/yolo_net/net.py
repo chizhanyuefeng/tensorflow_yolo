@@ -179,8 +179,10 @@ class Net(object):
         self._image_input_tensor = tf.placeholder(tf.float32, shape=[None,self._input_size,self._input_size,3])
         print('开始构建yolo网络...')
         self._net_output = self._image_input_tensor
+
         for i in range(len(net_structure_params)):
             name = net_structure_params[i]['name']
+
             if 'convolutional' in name:
                 filters = int(net_structure_params[i]['filters'])
                 size = int(net_structure_params[i]['size'])
@@ -192,12 +194,14 @@ class Net(object):
                 self._net_output = self._conv2d_layer(name,self._net_output,size,channels,filters,stride,activation)
                 print('建立[%s]层，卷积核大小=[%d],个数=[%d],步长=[%d],激活函数=[%s]'%
                       (name,size,filters,stride,activation))
+
             elif 'maxpool' in name:
                 size = int(net_structure_params[i]['size'])
                 stride = int(net_structure_params[i]['stride'])
                 self._net_output = self._max_pooling_layer(name,self._net_output,size,[1,stride,stride,1])
                 print('建立[%s]层，pooling大小=[%d],步长=[%d]' %
                       (name, size,stride))
+
             elif 'connected' in name:
                 shape = self._net_output.get_shape().as_list()
                 input_size = 1
@@ -209,12 +213,15 @@ class Net(object):
                 print('建立[%s]层，输入层=[%d],输出层=[%d],激活函数=[%s]'%
                       (name, input_size,output_size, activation))
             else:
-                print('网络配置文件出错！')
-                break
+                print(self._cfg_file_path,'网络配置文件出错！')
+                return
         print('构建完网络结构！')
 
     def _load_model(self):
-
+        '''
+        加载模型
+        :return:
+        '''
         # 用来打印model的变量名字和数据
         # reader = pywrap_tensorflow.NewCheckpointReader(model_file)
         # var_to_shape_map = reader.get_variable_to_shape_map()
@@ -251,7 +258,7 @@ class Net(object):
 
         # 加载模型
         self._load_model()
-        
+
         # 将网络输出进行解析
         result_classes, result_bboxes, result_scores = self.__interpert_output(self._net_output[0])
         during = str(time.time() - start_time)
@@ -291,7 +298,6 @@ class Net(object):
         output_filter = output[0]
         output_confidences = output[1]
         output_bboxes = output[2]
-        #print('output_filter',output_filter)
 
         # 根据过滤器来获得每个属性（类，bbox，score）过滤后的tensor
         filtered_classes = []
@@ -450,8 +456,16 @@ class Net(object):
         cv2.waitKey(3000)
 
 
-    def train(self):
-        return NotImplementedError
+    def train(self,loss):
+        '''
+        网络训练
+        :param loss:
+        :return:
+        '''
+        train_option = tf.train.MomentumOptimizer(self._learning_rate,self._momentum).minimize(loss)
+
+        return train_option
+
 
     def loss(self):
         return NotImplementedError

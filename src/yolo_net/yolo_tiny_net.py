@@ -21,8 +21,6 @@ class YoloTinyNet(Net):
 
 if __name__ =='__main__':
     tiny = YoloTinyNet()
-    #tiny.construct_graph()
-    #tiny.load_model()
     tiny.test('../../data/cute.jpeg')
 
 
