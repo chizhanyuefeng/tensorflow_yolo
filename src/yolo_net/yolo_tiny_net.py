@@ -9,6 +9,7 @@ class YoloTinyNet(Net):
         self._cfg_file_path = '../../cfg/tiny-yolo.cfg'
         self._model_path = '../../weights/YOLO_tiny.ckpt'
         self._net_name = 'Yolo tiny net'
+        self._construct_graph()
 
     def train(self):
         # TODO:
@@ -20,9 +21,9 @@ class YoloTinyNet(Net):
 
 if __name__ =='__main__':
     tiny = YoloTinyNet()
-    tiny.construct_graph()
-    tiny.load_model()
-    tiny.test('../../data/123.jpg')
+    #tiny.construct_graph()
+    #tiny.load_model()
+    tiny.test('../../data/cute.jpeg')
 
 
     # a = np.zeros([3,3])

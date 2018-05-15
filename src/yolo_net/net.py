@@ -160,7 +160,7 @@ class Net(object):
         '''
         return tf.Variable(tf.constant(0.1,shape=shape),dtype=tf.float32)
 
-    def construct_graph(self):
+    def _construct_graph(self):
         '''
         构建网络tensor graph
         :return:
@@ -213,7 +213,7 @@ class Net(object):
                 break
         print('构建完网络结构！')
 
-    def load_model(self):
+    def _load_model(self):
 
         # 用来打印model的变量名字和数据
         # reader = pywrap_tensorflow.NewCheckpointReader(model_file)
@@ -232,6 +232,8 @@ class Net(object):
         :param image_path:
         :return:
         '''
+
+        # 读取图片
         start_time = time.time()
         self._image = cv2.imread(image_path)
         self._image_height,self._image_width,_ = self._image.shape
@@ -247,6 +249,9 @@ class Net(object):
         input[0] = normaliztion_image
         self._image_inputs = input
 
+        # 加载模型
+        self._load_model()
+        
         # 将网络输出进行解析
         result_classes, result_bboxes, result_scores = self.__interpert_output(self._net_output[0])
         during = str(time.time() - start_time)
