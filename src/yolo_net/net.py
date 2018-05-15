@@ -14,15 +14,17 @@ class Net(object):
     Base Net class
     '''
 
-    _momentum = 0.9
-    _learning_rate = None
-    _max_objects_per_image = 20
-    _weights_decay = 0.0005 # 权值衰减
+    # _momentum = 0.9
+    # _learning_rate = None
+    # __leaky_alpha = 0.1
+    #__max_objects_per_image = 20
+    # __weights_decay = 0.0005 # 权值衰减
     _trainable = False
     _cfg_file_path = None
-    _leaky_alpha = 0.1
+
     _model_path = None
     _net_name = None
+
     classes = ["aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow", "diningtable",
                "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
 
@@ -160,6 +162,28 @@ class Net(object):
         '''
         return tf.Variable(tf.constant(0.1,shape=shape),dtype=tf.float32)
 
+
+    def __train_init(self,train_params):
+        '''
+        初始化训练参数和构建tensor
+        :param train_params:
+        :return:
+        '''
+
+        self.__max_objects_per_image = int(train_params['max_objects_per_image'])
+        self.__object_scale = float(train_params['object_scale'])
+        self.__noobject_scale = float(train_params['noobject_scale'])
+        self.__class_scale = float(train_params['class_scale'])
+        self.__coord_scale = float(train_params['coord_scale'])
+        self.__momentum = float(train_params['momentum'])
+        self.__weights_decay = float(train_params['weights_decay'])
+        self.__leaky_alpha = float(train_params['leaky_alpha'])
+        self.__learning_rate = float(train_params['learning_rate'])
+        self.__max_iterators = int(train_params['max_iterators'])
+
+        self.__labels = tf.placeholder(tf.float32,[None,self.__max_objects_per_image,5])
+
+
     def _construct_graph(self):
         '''
         构建网络tensor graph
@@ -175,6 +199,9 @@ class Net(object):
         self._boxes_per_cell = int(net_params['boxes_per_cell'])
         self._iou_threshold = float(net_params['iou_threshold'])
         self._score_threshold = float(net_params['score_threshold'])
+
+        if self._trainable:
+            self.__train_init(train_params)
 
         self._image_input_tensor = tf.placeholder(tf.float32, shape=[None,self._input_size,self._input_size,3])
         print('开始构建yolo网络...')
@@ -468,5 +495,9 @@ class Net(object):
 
 
     def loss(self):
-        return NotImplementedError
+        '''
+        计算网络的loss
+        :return:
+        '''
+
 
