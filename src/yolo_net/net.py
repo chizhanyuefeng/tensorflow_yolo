@@ -357,19 +357,16 @@ class Net(object):
         # 将每个bbox转为绝对坐标
         for i in range(bboxes.shape[0]):
             bboxes[i] = self.__bbox_pos(celles[i], bboxes[i])
-
         # 通过非极大抑制，来筛选iou
         for i in range(len(classes)):
             if i==len(classes)-1:
-                # bboxes[i] = self.__bbox_pos(celles[i], bboxes[i])
                 break
             else:
                 for j in range(i+1,len(classes)):
-                    # bboxes[i] = self.__bbox_pos(celles[i],bboxes[i])
-                    # bboxes[j] = self.__bbox_pos(celles[j],bboxes[j])
                     iou = self.__iou(bboxes[i],bboxes[j])
                     if iou>=self._iou_threshold:
                         scores[j]=0
+                        print(bboxes[j])
 
         return classes,bboxes,scores
 
@@ -382,16 +379,17 @@ class Net(object):
         '''
 
         # 计算bbox的1/2的宽度和高度
-        half_bw = self._image_width*bbox[2]/2
-        half_bh = self._image_height*bbox[3]/2
+        half_bw = self._image_width*bbox[2]*bbox[2]/2
+        half_bh = self._image_height*bbox[3]*bbox[3]/2
 
         # 计算原始大小的图片每个cell的宽和高
         cell_width = self._image_width/self._cell_size
         cell_height = self._image_height/self._cell_size
 
         # 计算中心坐标点
-        center_x = bbox[0]*cell_width + cell_width*cell[0]
-        center_y = bbox[1]*cell_height + cell_height*cell[1]
+        center_x = bbox[0]*cell_width + cell_width*cell[1]
+        center_y = bbox[1]*cell_height + cell_height*cell[0]
+        print('half_w_h',half_bw,half_bh)
 
         return [center_x-half_bw,center_y-half_bh,center_x+half_bw,center_y+half_bh]
 
@@ -422,16 +420,20 @@ class Net(object):
 
         return cross_area / (bbox1_area + bbox2_area - cross_area)
 
-    def __show_result(self,bboxes):
+    def __show_result(self,classes,bboxes,scores):
         '''
         显示结果
         :return:
         '''
         image = self._image.copy()
         for i in range(len(bboxes)):
-            cv2.rectangle(image, (bboxes[i][0], bboxes[i][1]), (bboxes[i][2], bboxes[i][3]), (0, 255, 0), 2)
-
-        cv2.imshow('YOLO_tiny detection', image)
+            for j in range(len(bboxes[i])):
+                if scores[i][j]:
+                    cv2.rectangle(image, (bboxes[i][j][0], bboxes[i][j][1]), (bboxes[i][j][2], bboxes[i][j][3]), (0, 255, 0), 2)
+                    cv2.rectangle(image, (int(bboxes[i][j][0]), int(bboxes[i][j][1] - 20)), (int(bboxes[i][j][2]), int(bboxes[i][j][1])), (125, 125, 125), -1)
+                    cv2.putText(image, self.classes[classes[i][j]] + ' : %.2f' % scores[i][j], (int(bboxes[i][j][0]+5), int(bboxes[i][j][1]-7)),
+                                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1)
+        cv2.imshow('YOLO detection', image)
         cv2.waitKey(3000)
 
 

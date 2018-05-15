@@ -21,7 +21,7 @@ if __name__ =='__main__':
     tiny = YoloTinyNet()
     tiny.construct_graph()
     tiny.load_model()
-    tiny.test('../../data/123.jpg')
+    tiny.test('../../data/dog.jpg')
 
 
     # a = np.zeros([3,3])
