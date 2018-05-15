@@ -15,13 +15,14 @@ class Net(object):
     '''
 
     _momentum = 0.9
-    _learning_rate = 0
+    _learning_rate = None
     _max_objects_per_image = 20
     _weights_decay = 0.0005 # 权值衰减
     _trainable = False
-    _cfg_file_path = ''
+    _cfg_file_path = None
     _leaky_alpha = 0.1
-    _model_path = ''
+    _model_path = None
+    _net_name = None
     classes = ["aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow", "diningtable",
                "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
 
@@ -234,19 +235,27 @@ class Net(object):
         start_time = time.time()
         self._image = cv2.imread(image_path)
         self._image_height,self._image_width,_ = self._image.shape
-        #print('..?????????/',self._image_height,self._image_width)
 
+        # 将图片resize成[448,448,3]，因为opencv读取图片后存储格式为BGR，所以需要再转为RGB
         resized_image = cv2.resize(self._image,(self._input_size,self._input_size))
         img_RGB = cv2.cvtColor(resized_image, cv2.COLOR_BGR2RGB)
         img_resized_np = np.asarray(img_RGB)
 
+        # 将数据进行归一化处理
         normaliztion_image = img_resized_np/255.0*2.0 -1
         input = np.zeros([1,448,448,3],np.float32)
         input[0] = normaliztion_image
         self._image_inputs = input
-        self.__interpert_output(self._net_output[0])
+
+        # 将网络输出进行解析
+        result_classes, result_bboxes, result_scores = self.__interpert_output(self._net_output[0])
         during = str(time.time() - start_time)
-        print('耗时=', during)
+        print('检测耗时=', during)
+
+        # 展示结果
+        self.__show_result(result_classes, result_bboxes, result_scores)
+
+
 
     def __interpert_output(self,output):
         '''
@@ -331,7 +340,7 @@ class Net(object):
             result_bboxes.append(bboxes)
             result_scores.append(scores)
 
-        self.__show_result(result_classes,result_bboxes,result_scores)
+        return result_classes,result_bboxes,result_scores
 
     def __interpert_result(self,classes,bboxes,cell,scores):
         '''
@@ -389,7 +398,6 @@ class Net(object):
         # 计算中心坐标点
         center_x = bbox[0]*cell_width + cell_width*cell[1]
         center_y = bbox[1]*cell_height + cell_height*cell[0]
-        print('half_w_h',half_bw,half_bh)
 
         return [center_x-half_bw,center_y-half_bh,center_x+half_bw,center_y+half_bh]
 
@@ -433,7 +441,7 @@ class Net(object):
                     cv2.rectangle(image, (int(bboxes[i][j][0]), int(bboxes[i][j][1] - 20)), (int(bboxes[i][j][2]), int(bboxes[i][j][1])), (125, 125, 125), -1)
                     cv2.putText(image, self.classes[classes[i][j]] + ' : %.2f' % scores[i][j], (int(bboxes[i][j][0]+5), int(bboxes[i][j][1]-7)),
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1)
-        cv2.imshow('YOLO detection', image)
+        cv2.imshow(self._net_name+'detection', image)
         cv2.waitKey(3000)
 
 
