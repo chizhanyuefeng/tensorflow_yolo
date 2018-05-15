@@ -169,22 +169,18 @@ class Net(object):
         :param train_params:
         :return:
         '''
-        if self._trainable:
-            self.__max_objects_per_image = int(train_params['max_objects_per_image'])
-            self.__object_scale = float(train_params['object_scale'])
-            self.__noobject_scale = float(train_params['noobject_scale'])
-            self.__class_scale = float(train_params['class_scale'])
-            self.__coord_scale = float(train_params['coord_scale'])
-            self.__momentum = float(train_params['momentum'])
-            self.__weights_decay = float(train_params['weights_decay'])
-            self.__leaky_alpha = float(train_params['leaky_alpha'])
-            self.__learning_rate = float(train_params['learning_rate'])
-            self.__max_iterators = int(train_params['max_iterators'])
+        self.__max_objects_per_image = int(train_params['max_objects_per_image'])
+        self.__object_scale = float(train_params['object_scale'])
+        self.__noobject_scale = float(train_params['noobject_scale'])
+        self.__class_scale = float(train_params['class_scale'])
+        self.__coord_scale = float(train_params['coord_scale'])
+        self.__momentum = float(train_params['momentum'])
+        self.__weights_decay = float(train_params['weights_decay'])
+        self.__leaky_alpha = float(train_params['leaky_alpha'])
+        self.__learning_rate = float(train_params['learning_rate'])
+        self.__max_iterators = int(train_params['max_iterators'])
 
-            self.__labels = tf.placeholder(tf.float32,[None,self.__max_objects_per_image,5])
-        else:
-            self.__leaky_alpha = float(train_params['leaky_alpha'])
-
+        self.__labels = tf.placeholder(tf.float32,[None,self.__max_objects_per_image,5])
 
     def _construct_graph(self):
         '''
@@ -202,9 +198,11 @@ class Net(object):
         self._boxes_per_cell = int(net_params['boxes_per_cell'])
         self._iou_threshold = float(net_params['iou_threshold'])
         self._score_threshold = float(net_params['score_threshold'])
+        self.__leaky_alpha = float(net_params['leaky_alpha'])
 
         # 如需进行训练，则加载训练参数
-        self.__train_init(train_params)
+        if self._trainable:
+            self.__train_init(train_params)
 
         # 开始构建网络结构
         self._image_input_tensor = tf.placeholder(tf.float32, shape=[None,self._input_size,self._input_size,3])
