@@ -21,7 +21,7 @@ if __name__ =='__main__':
     tiny = YoloTinyNet()
     tiny.construct_graph()
     tiny.load_model()
-    tiny.test('../../data/eagle.jpg')
+    tiny.test('../../data/123.jpg')
 
 
     # a = np.zeros([3,3])
@@ -44,6 +44,15 @@ if __name__ =='__main__':
     # a = np.array([2,3,1])
     # b = np.argsort(a)
     # print(b)
+    #
+    # a = tf.constant([False,False])
+    # b = tf.where(a)
+    # sess = tf.Session()
+    # c = sess.run(b)
+    # if not c:
+    #     print('dwadwa')
+    # else:
+    #     print('dwadawdawdwadwad')
 
 
 

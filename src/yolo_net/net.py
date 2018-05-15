@@ -231,7 +231,7 @@ class Net(object):
         :param image_path:
         :return:
         '''
-        start = time.time()
+        start_time = time.time()
         self._image = cv2.imread(image_path)
         self._image_height,self._image_width,_ = self._image.shape
         #print('..?????????/',self._image_height,self._image_width)
@@ -244,10 +244,9 @@ class Net(object):
         input = np.zeros([1,448,448,3],np.float32)
         input[0] = normaliztion_image
         self._image_inputs = input
-        #output = self.__get_session().run(self._net_output,feed_dict={self._image_input:input})
-        during = str(time.time() - start)
-        print('耗时=',during)
         self.__interpert_output(self._net_output[0])
+        during = str(time.time() - start_time)
+        print('耗时=', during)
 
     def __interpert_output(self,output):
         '''
@@ -274,49 +273,52 @@ class Net(object):
         # filter 的shape = [N,4]，其中N为多少个符合阈值的数据，4为其数据坐在confidence_scores的每一维度数据
         filter = tf.where(score_filter)
 
+        output = self.__get_session().run([filter,confidences,boxes], feed_dict={self._image_input_tensor: self._image_inputs})
+        output_filter = output[0]
+        output_confidences = output[1]
+        output_bboxes = output[2]
+        #print('output_filter',output_filter)
+
         # 根据过滤器来获得每个属性（类，bbox，score）过滤后的tensor
-        classes_tensor = []
-        filtered_boxes_tensor = []
-        filtered_cell_tensor = []
-        filtered_score_tensor = []
-        filter_shape = filter.get_shape().as_list()
+        filtered_classes = []
+        filtered_boxes = []
+        filtered_cell= []
+        filtered_score = []
 
         # 如果过滤器为空，则说明什么都没有检测出来
-        if filter_shape is None:
+        if not output_filter.any():
+            print('没有检测出任何物体')
             return None
 
-        for i in range(len(filter_shape)):
-            temp = filter[i]
-            classes_tensor.append(filter[i][3])
-            filtered_boxes_tensor.append(boxes[temp[0]][temp[1]][temp[2]][:])
-            filtered_cell_tensor.append([temp[0],temp[1]])
-            filtered_score_tensor.append(confidences[temp[0]][temp[1]][temp[2]])
+        # 通过过滤器来获取类别，bbox，cell，score
+        for i in range(len(output_filter)):
+            temp = output_filter[i]
+            filtered_classes.append(output_filter[i][3])
+            filtered_boxes.append(output_bboxes[temp[0]][temp[1]][temp[2]][:])
+            filtered_cell.append([temp[0],temp[1]])
+            filtered_score.append(output_confidences[temp[0]][temp[1]][temp[2]])
 
-        # classes_tensor shape=[c],filtered_boxes_tensor shape = [c,4],filtered_score_tensor shape = [c]
-        output = self.__get_session().run([classes_tensor,filtered_boxes_tensor,filtered_cell_tensor,filtered_score_tensor], feed_dict={self._image_input_tensor: self._image_inputs})
-
-        output_classes = []# result_classes = np.array(result[0])
-        output_boxes = []# result_boxes = np.array(result[1])
-        output_cell = [] # result_boxes = np.array(result[2])
-        output_scores = []# result_scores = np.array(result[3])
+        output_classes = []
+        output_boxes = []
+        output_cell = []
+        output_scores = []
 
         # 数据分类
         for i in range(20):
-            index = np.argwhere(np.array(output[0])==i).reshape([-1])
-
+            index = np.argwhere(np.array(filtered_classes)==i).reshape([-1])
             if not index.any():
                 continue
             # 每个类的类别
-            temp = np.array(output[0])[index].reshape([-1])
+            temp = np.array(filtered_classes)[index].reshape([-1])
             output_classes.append(temp)
             # 每个类中每个检测对象的bbox
-            temp = np.array(output[1])[index].reshape([-1,4])
+            temp = np.array(filtered_boxes)[index].reshape([-1,4])
             output_boxes.append(temp)
             # 每个类中每个检测对象的bbox所在的cell
-            temp = np.array(output[2])[index].reshape([-1, 2])
+            temp = np.array(filtered_cell)[index].reshape([-1, 2])
             output_cell.append(temp)
             # 每个类中的每个检测对象的得分
-            temp = np.array(output[3])[index].reshape([-1])
+            temp = np.array(filtered_score)[index].reshape([-1])
             output_scores.append(temp)
 
         result_classes = []
@@ -328,7 +330,7 @@ class Net(object):
             result_classes.append(classes)
             result_bboxes.append(bboxes)
             result_scores.append(scores)
-        print('result_bboxes',result_bboxes)
+
         self.__show_result(result_bboxes[0])
 
     def __interpert_result(self,classes,bboxes,cell,scores):
@@ -425,7 +427,7 @@ class Net(object):
             cv2.rectangle(image, (bboxes[i][0], bboxes[i][1]), (bboxes[i][2], bboxes[i][3]), (0, 255, 0), 2)
 
         cv2.imshow('YOLO_tiny detection', image)
-        cv2.waitKey(10000)
+        cv2.waitKey(1000)
 
 
     def train(self):
