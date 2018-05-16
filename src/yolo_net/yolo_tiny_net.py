@@ -11,50 +11,21 @@ class YoloTinyNet(Net):
         self._net_name = 'Yolo tiny net'
         self._construct_graph()
 
-    def train(self):
-        # TODO:
-        pass
-
-    def loss(self):
-        # TODO:
-        pass
+    # def train(self):
+    #     # TODO:
+    #     pass
+    #
+    # def loss(self):
+    #     # TODO:
+    #     pass
 
 if __name__ =='__main__':
     tiny = YoloTinyNet()
-    tiny.test('../../data/cute.jpeg')
+    tiny.test('../../data/car.jpg')
 
 
-    # a = np.zeros([3,3])
-    # a[:,0:1] = 1
+    # a = [[1,2]]*4
     # print(a)
-    # b = np.nonzero(a)
-    # print(b)
-
-    # a = tf.Variable([[0,0],[1,1]])
-    # c = tf.constant([[1],[2]])
-    #
-    # sess = tf.Session()
-    # sess.run(tf.global_variables_initializer())
-    # print(sess.run(a))
-    #
-    # b = a[:,0:1]
-    # b = tf.multiply(b,c)
-    # print(sess.run(a))
-
-    # a = np.array([2,3,1])
-    # b = np.argsort(a)
-    # print(b)
-    #
-    # a = tf.constant([False,False])
-    # b = tf.where(a)
-    # sess = tf.Session()
-    # c = sess.run(b)
-    # if not c:
-    #     print('dwadwa')
-    # else:
-    #     print('dwadawdawdwadwad')
-
-
 
 
 

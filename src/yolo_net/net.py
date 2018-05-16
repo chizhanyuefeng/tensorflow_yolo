@@ -287,9 +287,14 @@ class Net(object):
         self._load_model()
 
         # 将网络输出进行解析
-        result_classes, result_bboxes, result_scores = self.__interpert_output(self._net_output[0])
+        result = self.__interpert_output(self._net_output[0])
         during = str(time.time() - start_time)
         print('检测耗时=', during)
+
+        if not result:
+            return
+        else:
+            result_classes, result_bboxes, result_scores =result
 
         # 展示结果
         self.__show_result(result_classes, result_bboxes, result_scores)
