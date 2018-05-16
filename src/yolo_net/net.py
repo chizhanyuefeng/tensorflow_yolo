@@ -14,11 +14,6 @@ class Net(object):
     Base Net class
     '''
 
-    # _momentum = 0.9
-    # _learning_rate = None
-    # __leaky_alpha = 0.1
-    #__max_objects_per_image = 20
-    # __weights_decay = 0.0005 # 权值衰减
     _trainable = False
     _cfg_file_path = None
 
@@ -150,7 +145,7 @@ class Net(object):
         weights = tf.Variable(tf.truncated_normal(shape,stddev=0.1),
                               dtype=tf.float32)
         if self._trainable:
-            weights_decay = tf.multiply(weights,self._weights_decay)
+            weights_decay = tf.multiply(weights,self.__weights_decay)
             tf.add_to_collection('losses',weights_decay)
         return weights
 
@@ -163,12 +158,13 @@ class Net(object):
         return tf.Variable(tf.constant(0.1,shape=shape),dtype=tf.float32)
 
 
-    def __train_init(self,train_params):
+    def __load_train_params(self,train_params):
         '''
         初始化训练参数和构建tensor
         :param train_params:
         :return:
         '''
+        self.__batch_size = int(train_params['batch_size'])
         self.__max_objects_per_image = int(train_params['max_objects_per_image'])
         self.__object_scale = float(train_params['object_scale'])
         self.__noobject_scale = float(train_params['noobject_scale'])
@@ -180,7 +176,8 @@ class Net(object):
         self.__learning_rate = float(train_params['learning_rate'])
         self.__max_iterators = int(train_params['max_iterators'])
 
-        self.__labels = tf.placeholder(tf.float32,[None,self.__max_objects_per_image,5])
+        # 输入标签，5 = [x,y,w,h,c]
+        self.__labels = tf.placeholder(tf.float32,[self.__batch_size,self.__max_objects_per_image,5])
 
     def _construct_graph(self):
         '''
@@ -191,7 +188,6 @@ class Net(object):
         net_params, train_params, net_structure_params =cp.parser_cfg_file(self._cfg_file_path)
 
         # 加载网络基本配置参数
-        self._batch_size = int(net_params['batch_size'])
         self._input_size = int(net_params['input_size'])
         self._classes_num = int(net_params['classes_num'])
         self._cell_size = int(net_params['cell_size'])
@@ -202,10 +198,11 @@ class Net(object):
 
         # 如需进行训练，则加载训练参数
         if self._trainable:
-            self.__train_init(train_params)
+            self._image_input_tensor = tf.placeholder(tf.float32, shape=[self.__batch_size, self._input_size, self._input_size, 3])
+            self.__load_train_params(train_params)
+        else:
+            self._image_input_tensor = tf.placeholder(tf.float32, shape=[None,self._input_size,self._input_size,3])
 
-        # 开始构建网络结构
-        self._image_input_tensor = tf.placeholder(tf.float32, shape=[None,self._input_size,self._input_size,3])
         print('开始构建yolo网络...')
         self._net_output = self._image_input_tensor
 
@@ -296,8 +293,6 @@ class Net(object):
 
         # 展示结果
         self.__show_result(result_classes, result_bboxes, result_scores)
-
-
 
     def __interpert_output(self,output):
         '''
@@ -416,7 +411,6 @@ class Net(object):
                     iou = self.__iou(bboxes[i],bboxes[j])
                     if iou>=self._iou_threshold:
                         scores[j]=0
-                        print(bboxes[j])
 
         return classes,bboxes,scores
 
@@ -485,22 +479,25 @@ class Net(object):
         cv2.imshow(self._net_name+'detection', image)
         cv2.waitKey(3000)
 
-
     def train(self,loss):
         '''
         网络训练
         :param loss:
         :return:
         '''
-        train_option = tf.train.MomentumOptimizer(self._learning_rate,self._momentum).minimize(loss)
-
+        train_option = tf.train.MomentumOptimizer(self.__learning_rate,self.__momentum).minimize(loss)
         return train_option
-
 
     def loss(self):
         '''
         计算网络的loss
         :return:
         '''
+        # 获取每个类的概率值,置信度,bbox
+        classes_probs = tf.reshape(self._net_output[:, 0:7 * 7 * 20], [-1,7, 7, 20])
+        confidences = tf.reshape(self._net_output[:, 7 * 7 * 20:7 * 7 * 22], [-1,7, 7, 2])
+        boxes = tf.reshape(self._net_output[:, 7 * 7 * 22:], [-1,7, 7, 2, 4])
+
+
 
 
