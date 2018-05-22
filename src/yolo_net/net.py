@@ -560,16 +560,44 @@ class Net(object):
         predict_boxes = predict_boxes + coord_size
 
         '''计算iou'''
+        iou = self.__train_iou(predict_boxes, label)
+        
 
 
     def __train_iou(self,predict,label):
         '''
         计算训练时候的iou
-        :param predict:
-        :param label:
+        :param predict: 4D -> [7,7,2,4] ,其中4=[x,y,w,h]
+        :param label: 1D -> [x,y,w,h]
         :return:
         '''
-        pass
+
+        predict = tf.stack([predict[:, :, :, 0] - predict[:, :, :, 2] / 2, # 左上角x
+                            predict[:, :, :, 1] - predict[:, :, :, 3] / 2, # 左上角y
+                            predict[:, :, :, 0] + predict[:, :, :, 2] / 2, # 右下角x
+                            predict[:, :, :, 1] + predict[:, :, :, 3] / 2], # 右下角y
+                           axis=3)
+
+        label = tf.stack([label[0] - label[2] / 2, # 左上角x
+                          label[1] - label[3] / 2, # 左上角y
+                          label[0] + label[2] / 2, # 右下角x
+                          label[1] + label[3] / 2]) # 右下角y
+
+        left_max_coord = tf.maximum(predict[:, :, :, 0:2], label[0:2])
+        right_min_coord = tf.minimum(predict[:, :, :, 2:],label[2:])
+
+        inter = right_min_coord - left_max_coord
+        filter = tf.cast(inter[:, :, :, 0] > 0, tf.float32)
+        # 交叉面积
+        inter_area = inter[:, :, :, 0] * inter[:, :, :, 1] * filter
+        # 预测面积
+        predict_area = (predict[:, :, :, :2] - predict[:, :, :, :0]) * (predict[:, :, :, :1] - predict[:, :, :, :3])
+        # 真实bbox面积
+        label_area = (label[2] - label[0]) * (label[3] - label[1])
+
+        mix_area = predict_area + label_area - inter_area
+
+        return inter_area / mix_area
 
 
     def __loss(self):

@@ -14,23 +14,17 @@ class YoloTinyNet(Net):
 
 if __name__ =='__main__':
     # tiny = YoloTinyNet()
-    # tiny.test('../../data/car.jpg')
-    a = tf.constant([[0,2],[3,0]])
-    b = a+1
+    # tiny.test('../../data/2.jpg')
+
+    # a = tf.zeros([3,3,2])
+    # sess = tf.Session()
+    # a[2, 2, :] = [1, 2]
+    # print(sess.run(a))
+    a = tf.ones([1,2,3,4],tf.float32)
+    b = tf.constant([1,0,3,4],tf.float32)
+    c = a+b
+    #b = tf.transpose(a,[1,2,3,0])
+
     sess = tf.Session()
-    print(sess.run(b))
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    print(sess.run(c))
