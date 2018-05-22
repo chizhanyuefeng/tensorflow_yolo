@@ -11,21 +11,14 @@ class YoloTinyNet(Net):
         self._net_name = 'Yolo tiny net'
         self._construct_graph()
 
-    # def train(self):
-    #     # TODO:
-    #     pass
-    #
-    # def loss(self):
-    #     # TODO:
-    #     pass
 
 if __name__ =='__main__':
-    tiny = YoloTinyNet()
-    tiny.test('../../data/car.jpg')
-
-
-    # a = [[1,2]]*4
-    # print(a)
+    # tiny = YoloTinyNet()
+    # tiny.test('../../data/car.jpg')
+    a = tf.constant([[0,2],[3,0]])
+    b = a+1
+    sess = tf.Session()
+    print(sess.run(b))
 
 
 

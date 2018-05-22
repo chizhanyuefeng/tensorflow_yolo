@@ -178,6 +178,7 @@ class Net(object):
 
         # 输入标签，5 = [x,y,w,h,c]
         self.__labels = tf.placeholder(tf.float32,[self.__batch_size,self.__max_objects_per_image,5])
+        self.__labels_objects_num = tf.placeholder(tf.float32,[self.__batch_size,1])
 
     def _construct_graph(self):
         '''
@@ -484,7 +485,7 @@ class Net(object):
         cv2.imshow(self._net_name+'detection', image)
         cv2.waitKey(3000)
 
-    def train(self,loss):
+    def __train(self,loss):
         '''
         网络训练
         :param loss:
@@ -493,15 +494,46 @@ class Net(object):
         train_option = tf.train.MomentumOptimizer(self.__learning_rate,self.__momentum).minimize(loss)
         return train_option
 
-    def loss(self):
+    def __cond(self,num,object_num,loss,label,predict):
+        '''
+        循环的条件函数
+        :return:
+        '''
+        pass
+
+    def __body(self,num,object_num,loss,label,predict):
+        '''
+        循环的执行函数
+        :return:
+        '''
+        return num <= object_num
+
+
+    def __loss(self):
         '''
         计算网络的loss
         :return:
         '''
-        # 获取每个类的概率值,置信度,bbox
-        classes_probs = tf.reshape(self._net_output[:, 0:7 * 7 * 20], [-1,7, 7, 20])
-        confidences = tf.reshape(self._net_output[:, 7 * 7 * 20:7 * 7 * 22], [-1,7, 7, 2])
-        boxes = tf.reshape(self._net_output[:, 7 * 7 * 22:], [-1,7, 7, 2, 4])
+        # # 获取每个类的概率值,置信度,bbox
+        # classes_probs = tf.reshape(self._net_output[:, 0:7 * 7 * 20], [-1,7, 7, 20])
+        # confidences = tf.reshape(self._net_output[:, 7 * 7 * 20:7 * 7 * 22], [-1,7, 7, 2])
+        # boxes = tf.reshape(self._net_output[:, 7 * 7 * 22:], [-1,7, 7, 2, 4])
+
+        boxes_loss = tf.constant(0,tf.float32)
+        probs_loss = tf.constant(0,tf.float32)
+        class_obj_loss = tf.constant(0,tf.float32)
+        class_noobj_loss = tf.constant(0,tf.float32)
+
+        # 对每个batch分别进行进算loss
+        for i in range(self.__batch_size):
+            predict = self._net_output[i]
+            label = self.__labels[i]
+            object_num = self.__labels_objects_num[i]
+            loss = [boxes_loss,probs_loss,class_obj_loss,class_noobj_loss]
+
+            loop_vars = [tf.constant(0),object_num,loss,label,predict]
+            losses = tf.while_loop(self.__cond,self.__body,loop_vars=loop_vars)
+
 
 
 
