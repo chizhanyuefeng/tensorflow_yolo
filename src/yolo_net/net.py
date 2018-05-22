@@ -523,8 +523,31 @@ class Net(object):
         boxes = tf.reshape(predict[7 * 7 * 22:], [7, 7, 2, 4])
         label = labels[num]
 
-        
+        '''找到该物体在7×7格子中所占的位置,最终生成的object_loc shape=[7,7],其中物体所占格子为1,其余为0'''
+        min_x = (label[0]-label[2]/2)/(self._input_size/self._cell_size)
+        max_x = (label[0]+label[2]/2)/(self._input_size/self._cell_size)
+        min_y = (label[1]-label[3]/2)/(self._input_size/self._cell_size)
+        max_y = (label[1]+label[3]/2)/(self._input_size/self._cell_size)
 
+        # 对min值进行向下取整，对max值进行向上取整
+        min_x = tf.floor(min_x)
+        min_y = tf.floor(min_y)
+        max_x = tf.ceil(max_x)
+        max_y = tf.ceil(max_y)
+
+        object_loc = tf.ones([max_y-min_y,max_x-min_x],tf.float32)
+        padding = [[min_y, self._cell_size-max_y-1], [min_x, self._cell_size-max_x-1]]
+        object_loc = tf.pad(object_loc,padding)
+
+        '''找到物体中心坐标所在格子,response shape = [7,7],中心点所在格子为1,其余为0'''
+        centre_x = tf.floor(label[0]/(self._input_size/self._cell_size))
+        centre_y = tf.floor(label[1]/(self._input_size/self._cell_size))
+
+        response = tf.ones([1,1],tf.float32)
+        padding = [[centre_y,self._cell_size-centre_y-1],[centre_x,self._cell_size-centre_x-1]]
+        response = tf.pad(response,padding)
+
+        
 
 
 
