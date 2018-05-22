@@ -414,7 +414,7 @@ class Net(object):
                 break
             else:
                 for j in range(i+1,len(classes)):
-                    iou = self.__iou(bboxes[i],bboxes[j])
+                    iou = self.__test_iou(bboxes[i],bboxes[j])
                     if iou>=self._iou_threshold:
                         scores[j]=0
 
@@ -442,7 +442,7 @@ class Net(object):
 
         return [center_x-half_bw,center_y-half_bh,center_x+half_bw,center_y+half_bh]
 
-    def __iou(self,bbox1,bbox2):
+    def __test_iou(self,bbox1,bbox2):
         '''
         计算iou
         :param bbox1: [left_top_x,left_top_y,right_bottom_x,right_bottom_y]
@@ -520,7 +520,7 @@ class Net(object):
         # 获取每个类的概率值,置信度,bbox
         classes_probs = tf.reshape(predict[0:7 * 7 * 20], [7, 7, 20])
         confidences = tf.reshape(predict[7 * 7 * 20:7 * 7 * 22], [7, 7, 2])
-        boxes = tf.reshape(predict[7 * 7 * 22:], [7, 7, 2, 4])
+        predict_boxes = tf.reshape(predict[7 * 7 * 22:], [7, 7, 2, 4])
         label = labels[num]
 
         '''找到该物体在7×7格子中所占的位置,最终生成的object_loc shape=[7,7],其中物体所占格子为1,其余为0'''
@@ -547,9 +547,29 @@ class Net(object):
         padding = [[centre_y,self._cell_size-centre_y-1],[centre_x,self._cell_size-centre_x-1]]
         response = tf.pad(response,padding)
 
-        
+        '''将预测的boxes数据转为绝对数据'''
+        cell_length = self._input_size/self._cell_size
+        predict_boxes = predict_boxes*[cell_length,cell_length,self._input_size,self._input_size]
+        coord_size = np.zeros([7,7,4])
+
+        for i in range(self._cell_size):
+            for j in range(self._cell_size):
+                coord_size[i,j,:] = [j*cell_length,i*cell_length,0,0]
+        # 将shape扩充为[7,7,2,4]
+        coord_size = np.tile(coord_size.reshape([7,7,1,4]),[1,1,self._boxes_per_cell,1])
+        predict_boxes = predict_boxes + coord_size
+
+        '''计算iou'''
 
 
+    def __train_iou(self,predict,label):
+        '''
+        计算训练时候的iou
+        :param predict:
+        :param label:
+        :return:
+        '''
+        pass
 
 
     def __loss(self):
