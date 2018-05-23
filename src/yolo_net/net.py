@@ -146,19 +146,19 @@ class Net(object):
                               dtype=tf.float32)
         if self._trainable:
             weights_decay = tf.multiply(tf.nn.l2_loss(weights), self.__weights_decay)
-            tf.add_to_collection('losses',weights_decay)
+            tf.add_to_collection('losses', weights_decay)
         return weights
 
-    def _variable_biases(self,shape):
+    def _variable_biases(self, shape):
         '''
         bias初始赋值为0.1
         :param shape:
         :return:
         '''
-        return tf.Variable(tf.constant(0.1,shape=shape),dtype=tf.float32)
+        return tf.Variable(tf.constant(0.1, shape=shape), dtype=tf.float32)
 
 
-    def __load_train_params(self,train_params):
+    def __load_train_params(self, train_params):
         '''
         初始化训练参数和构建tensor
         :param train_params:
@@ -549,7 +549,7 @@ class Net(object):
 
         temp = tf.cast((max_y - min_y, max_x - min_x), tf.int32)
         object_cells = tf.ones(temp, tf.float32)
-        padding = tf.cast(tf.stack([min_y, self._cell_size-max_y-1, min_x, self._cell_size-max_x-1]), tf.int32)
+        padding = tf.cast(tf.stack([min_y, self._cell_size-max_y, min_x, self._cell_size-max_x]), tf.int32)
         padding = tf.reshape(padding, (2, 2))
         object_cells = tf.pad(object_cells, padding)
         object_cells = tf.reshape(object_cells, (7, 7, 1))
@@ -709,8 +709,11 @@ class Net(object):
 
 
         with tf.Session() as sess:
+            sess.run(tf.global_variables_initializer())
+
             for step in range(self.__max_iterators):
                 feed_dict = {self._image_input_tensor : image_input, self.__labels : labels, self.__labels_objects_num : [[3]]}
-                _, loss = sess.run([train_option,self.__total_losses],feed_dict=feed_dict)
-                if step % 100:
+                _, loss = sess.run([train_option, self.__total_losses], feed_dict=feed_dict)
+                if step % 100 == 0:
                     print('loss', loss)
+                assert not np.isnan(loss), 'Model diverged with loss = NaN'
