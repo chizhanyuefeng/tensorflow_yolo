@@ -672,11 +672,23 @@ class Net(object):
 
         avg_losses = tf.reduce_sum(losses) / self.__batch_size
         tf.add_to_collection('losses',avg_losses)
-        self.__total_losses = tf.add_n(tf.get_collection('losses'))
-
-        return self.__total_losses
 
 
-    
+        return tf.add_n(tf.get_collection('losses'))
 
+
+    def train(self):
+        '''
+        网络训练
+        :return:
+        '''
+
+        self.__total_losses = self.__loss()
+
+        train_option = self.__train_optimize(self.__total_losses)
+
+        with tf.Session() as sess:
+            for step in range(self.__max_iterators):
+                feed_dict = {self._image_input_tensor : 0, self.__labels : 0, self.__labels_objects_num : 0}
+                sess.run(train_option,feed_dict={feed_dict})
 
