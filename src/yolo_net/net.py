@@ -485,7 +485,7 @@ class Net(object):
         cv2.imshow(self._net_name+'detection', image)
         cv2.waitKey(3000)
 
-    def __train(self,loss):
+    def __train_optimize(self,loss):
         '''
         网络训练
         :param loss:
@@ -668,8 +668,15 @@ class Net(object):
 
             # 对一张图片label包含的物体，分别进行计算loss
             output = tf.while_loop(self.__cond,self.__body,loop_vars=loop_vars)
-            losses = losses + output[1]
+            losses = losses + output[2]
+
+        avg_losses = tf.reduce_sum(losses) / self.__batch_size
+        tf.add_to_collection('losses',avg_losses)
+        self.__total_losses = tf.add_n(tf.get_collection('losses'))
+
+        return self.__total_losses
 
 
+    
 
 
