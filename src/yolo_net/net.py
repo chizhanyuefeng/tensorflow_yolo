@@ -142,10 +142,10 @@ class Net(object):
                             shape = [input_size,output_size]
         :return:
         '''
-        weights = tf.Variable(tf.truncated_normal(shape,stddev=0.1),
+        weights = tf.Variable(tf.truncated_normal(shape, stddev=0.1),
                               dtype=tf.float32)
         if self._trainable:
-            weights_decay = tf.multiply(weights,self.__weights_decay)
+            weights_decay = tf.multiply(tf.nn.l2_loss(weights), self.__weights_decay)
             tf.add_to_collection('losses',weights_decay)
         return weights
 
@@ -172,13 +172,13 @@ class Net(object):
         self.__coord_scale = float(train_params['coord_scale'])
         self.__momentum = float(train_params['momentum'])
         self.__weights_decay = float(train_params['weights_decay'])
-        self.__leaky_alpha = float(train_params['leaky_alpha'])
+        #self.__leaky_alpha = float(train_params['leaky_alpha'])
         self.__learning_rate = float(train_params['learning_rate'])
         self.__max_iterators = int(train_params['max_iterators'])
 
         # 输入标签，5 = [x,y,w,h,c]
-        self.__labels = tf.placeholder(tf.float32,[self.__batch_size,self.__max_objects_per_image,5])
-        self.__labels_objects_num = tf.placeholder(tf.float32,[self.__batch_size,1])
+        self.__labels = tf.placeholder(tf.float32,(self.__batch_size,self.__max_objects_per_image,5))
+        self.__labels_objects_num = tf.placeholder(tf.int32,[self.__batch_size,1])
 
     def _construct_graph(self):
         '''
@@ -199,8 +199,8 @@ class Net(object):
 
         # 如需进行训练，则加载训练参数
         if self._trainable:
-            self._image_input_tensor = tf.placeholder(tf.float32, shape=[self.__batch_size, self._input_size, self._input_size, 3])
             self.__load_train_params(train_params)
+            self._image_input_tensor = tf.placeholder(tf.float32, shape=[self.__batch_size, self._input_size, self._input_size, 3])
         else:
             self._image_input_tensor = tf.placeholder(tf.float32, shape=[None,self._input_size,self._input_size,3])
 
@@ -261,6 +261,28 @@ class Net(object):
         self._model_saver = tf.train.Saver()
         self._model_saver.restore(self.__get_session(),self._model_path)
 
+    def img2yoloimg(self,image_path):
+        '''
+        将图片转为yolo可用的格式
+        :param image_path:
+        :return: input shape = [1, 448, 448, 3]
+        '''
+        self._image = cv2.imread(image_path)
+        self._image_height, self._image_width, _ = self._image.shape
+
+        # 将图片resize成[448,448,3]，因为opencv读取图片后存储格式为BGR，所以需要再转为RGB
+        resized_image = cv2.resize(self._image, (self._input_size, self._input_size))
+        img_RGB = cv2.cvtColor(resized_image, cv2.COLOR_BGR2RGB)
+        img_resized_np = np.asarray(img_RGB)
+
+        # 将数据进行归一化处理
+        normaliztion_image = img_resized_np / 255.0 * 2.0 - 1
+        input = np.zeros([1, 448, 448, 3], np.float32)
+        input[0] = normaliztion_image
+
+        return input
+
+
     def test(self,image_path):
         '''
         测试图片
@@ -270,18 +292,8 @@ class Net(object):
 
         # 读取图片
         start_time = time.time()
-        self._image = cv2.imread(image_path)
-        self._image_height,self._image_width,_ = self._image.shape
+        input = self.img2yoloimg(image_path)
 
-        # 将图片resize成[448,448,3]，因为opencv读取图片后存储格式为BGR，所以需要再转为RGB
-        resized_image = cv2.resize(self._image,(self._input_size,self._input_size))
-        img_RGB = cv2.cvtColor(resized_image, cv2.COLOR_BGR2RGB)
-        img_resized_np = np.asarray(img_RGB)
-
-        # 将数据进行归一化处理
-        normaliztion_image = img_resized_np/255.0*2.0 -1
-        input = np.zeros([1,448,448,3],np.float32)
-        input[0] = normaliztion_image
         self._image_inputs = input
 
         # 加载模型
@@ -505,7 +517,7 @@ class Net(object):
         :return:
         '''
 
-        return num <= object_num
+        return num < object_num
 
     def __body(self,num,object_num,loss,labels,predict):
         '''
@@ -535,17 +547,20 @@ class Net(object):
         max_x = tf.ceil(max_x)
         max_y = tf.ceil(max_y)
 
-        object_cells = tf.ones([max_y-min_y,max_x-min_x],tf.float32)
-        padding = [[min_y, self._cell_size-max_y-1], [min_x, self._cell_size-max_x-1]]
-        object_cells = tf.pad(object_cells,padding)
-        object_cells = tf.reshape(object_cells,(7,7,1))
+        temp = tf.cast((max_y - min_y, max_x - min_x), tf.int32)
+        object_cells = tf.ones(temp, tf.float32)
+        padding = tf.cast(tf.stack([min_y, self._cell_size-max_y-1, min_x, self._cell_size-max_x-1]), tf.int32)
+        padding = tf.reshape(padding, (2, 2))
+        object_cells = tf.pad(object_cells, padding)
+        object_cells = tf.reshape(object_cells, (7, 7, 1))
 
         '''找到物体中心坐标所在格子,response shape = [7,7],中心点所在格子为1,其余为0'''
         centre_x = tf.floor(label[0]/(self._input_size/self._cell_size))
         centre_y = tf.floor(label[1]/(self._input_size/self._cell_size))
 
         response = tf.ones([1,1],tf.float32)
-        padding = [[centre_y,self._cell_size-centre_y-1],[centre_x,self._cell_size-centre_x-1]]
+        padding = tf.cast(tf.stack([centre_y,self._cell_size-centre_y-1,centre_x,self._cell_size-centre_x-1]),tf.int32)
+        padding = tf.reshape(padding, (2, 2))
         response = tf.pad(response,padding)
 
         '''将预测的boxes数据转为绝对数据'''
@@ -589,7 +604,7 @@ class Net(object):
         label_y = label[1]
         label_sqrt_w = tf.sqrt(label[2])
         label_sqrt_h = tf.sqrt(label[3])
-        label_probs = tf.one_hot(label[4], self._classes_num,dtype=tf.float32)
+        label_probs = tf.one_hot(tf.cast(label[4],tf.int32), self._classes_num, dtype=tf.float32)
 
         '''计算loss'''
         class_probs_loss = tf.nn.l2_loss(object_cells * (predict_probs - label_probs)) * self.__class_scale
@@ -636,7 +651,7 @@ class Net(object):
         # 交叉面积
         inter_area = inter[:, :, :, 0] * inter[:, :, :, 1] * filter
         # 预测面积
-        predict_area = (predict[:, :, :, :2] - predict[:, :, :, :0]) * (predict[:, :, :, :1] - predict[:, :, :, :3])
+        predict_area = (predict[:, :, :, 2] - predict[:, :, :, 0]) * (predict[:, :, :, 1] - predict[:, :, :, 3])
         # 真实bbox面积
         label_area = (label[2] - label[0]) * (label[3] - label[1])
 
@@ -661,18 +676,17 @@ class Net(object):
         for i in range(self.__batch_size):
             predict = self._net_output[i]
             label = self.__labels[i]
-            object_num = self.__labels_objects_num[i]
+            object_num = self.__labels_objects_num[i][0]
 
-            loss = [boxes_loss,class_probs_loss,obj_confidence_loss,noobj_confidence_loss]
-            loop_vars = [tf.constant(0),object_num,loss,label,predict]
+            loss = [boxes_loss, class_probs_loss, obj_confidence_loss, noobj_confidence_loss]
+            loop_vars = [tf.constant(0), object_num, loss, label, predict]
 
             # 对一张图片label包含的物体，分别进行计算loss
-            output = tf.while_loop(self.__cond,self.__body,loop_vars=loop_vars)
+            output = tf.while_loop(self.__cond, self.__body, loop_vars=loop_vars)
             losses = losses + output[2]
 
         avg_losses = tf.reduce_sum(losses) / self.__batch_size
-        tf.add_to_collection('losses',avg_losses)
-
+        tf.add_to_collection('losses', avg_losses)
 
         return tf.add_n(tf.get_collection('losses'))
 
@@ -682,13 +696,21 @@ class Net(object):
         网络训练
         :return:
         '''
+        labels = np.zeros((1,20,5),np.float32)
 
+        labels[:, 0] = [108.18402777777779, 269.15432098765433, 114.91666666666667, 248.11111111111111, 11],
+        labels[:, 1] = [308.02430555555554, 81.49382716049382, 130.08333333333334, 85.55555555555556, 6]
+        labels[:, 2] = [145.22569444444446, 191.29012345679013, 261.9166666666667, 227.88888888888889, 1]
         self.__total_losses = self.__loss()
 
         train_option = self.__train_optimize(self.__total_losses)
 
+        image_input = self.img2yoloimg('../../data/dog.jpg')
+
+
         with tf.Session() as sess:
             for step in range(self.__max_iterators):
-                feed_dict = {self._image_input_tensor : 0, self.__labels : 0, self.__labels_objects_num : 0}
-                sess.run(train_option,feed_dict={feed_dict})
-
+                feed_dict = {self._image_input_tensor : image_input, self.__labels : labels, self.__labels_objects_num : [[3]]}
+                _, loss = sess.run([train_option,self.__total_losses],feed_dict=feed_dict)
+                if step % 100:
+                    print('loss', loss)
