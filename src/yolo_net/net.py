@@ -535,9 +535,10 @@ class Net(object):
         max_x = tf.ceil(max_x)
         max_y = tf.ceil(max_y)
 
-        object_loc = tf.ones([max_y-min_y,max_x-min_x],tf.float32)
+        object_cells = tf.ones([max_y-min_y,max_x-min_x],tf.float32)
         padding = [[min_y, self._cell_size-max_y-1], [min_x, self._cell_size-max_x-1]]
-        object_loc = tf.pad(object_loc,padding)
+        object_cells = tf.pad(object_cells,padding)
+        object_cells = tf.reshape(object_cells,(7,7,1))
 
         '''找到物体中心坐标所在格子,response shape = [7,7],中心点所在格子为1,其余为0'''
         centre_x = tf.floor(label[0]/(self._input_size/self._cell_size))
@@ -561,7 +562,51 @@ class Net(object):
 
         '''计算iou'''
         iou = self.__train_iou(predict_boxes, label)
-        
+        iou = tf.reshape(iou, (7, 7, 2))
+
+        '''找到对应物体负责（response）的格子的iou '''
+        response = tf.reshape(response, (7, 7, 1))
+
+        I = iou * response
+        # 预测的bbox和label bbox所做的iou
+        label_confidences = I
+
+        # max_I :shape=(7,7,1),更新完后的I只有一个值不为0，即为response的最大iou值
+        max_I = tf.reduce_max(I, axis=2, keep_dims=True)
+        I = tf.cast(I >= max_I, tf.float32) * response
+        no_I = 1 - I
+
+        # 提取预测数据，用于计算loss
+        predict_confidences = confidences
+        predict_x = predict_boxes[:, :, :, 0]
+        predict_y = predict_boxes[:, :, :, 1]
+        predict_sqrt_w = tf.sqrt(predict_boxes[:, :, :, 2])
+        predict_sqrt_h = tf.sqrt(predict_boxes[:, :, :, 3])
+        predict_probs = classes_probs
+
+        # 提取label数据用于计算loss
+        label_x = label[0]
+        label_y = label[1]
+        label_sqrt_w = tf.sqrt(label[2])
+        label_sqrt_h = tf.sqrt(label[3])
+        label_probs = tf.one_hot(label[4], self._classes_num,dtype=tf.float32)
+
+        '''计算loss'''
+        class_probs_loss = tf.nn.l2_loss(object_cells * (predict_probs - label_probs)) * self.__class_scale
+
+        boxes_loss = (tf.nn.l2_loss(I * (predict_x - label_x)) +
+                      tf.nn.l2_loss(I * (predict_y - label_y)) +
+                      tf.nn.l2_loss(I * (predict_sqrt_h - label_sqrt_h)) +
+                      tf.nn.l2_loss(I * (predict_sqrt_w - label_sqrt_w))
+                      ) * self.__coord_scale
+
+        confidences_loss = tf.nn.l2_loss(I * (predict_confidences - label_confidences)) * self.__object_scale
+        noobj_confidences_loss = tf.nn.l2_loss(no_I * predict_confidences) * self.__noobject_scale
+
+        losses = [loss[0] + boxes_loss, loss[1] + class_probs_loss, loss[2] + confidences_loss, loss[3] + noobj_confidences_loss]
+        num = num+1
+
+        return num,object_num,losses,labels,predict
 
 
     def __train_iou(self,predict,label):
@@ -607,9 +652,9 @@ class Net(object):
         '''
 
         boxes_loss = tf.constant(0,tf.float32)
-        probs_loss = tf.constant(0,tf.float32)
-        class_obj_loss = tf.constant(0,tf.float32)
-        class_noobj_loss = tf.constant(0,tf.float32)
+        class_probs_loss = tf.constant(0,tf.float32)
+        obj_confidence_loss = tf.constant(0,tf.float32)
+        noobj_confidence_loss = tf.constant(0,tf.float32)
 
         losses = [0,0,0,0]
         # 对每个batch分别进行进算loss
@@ -618,7 +663,7 @@ class Net(object):
             label = self.__labels[i]
             object_num = self.__labels_objects_num[i]
 
-            loss = [boxes_loss,probs_loss,class_obj_loss,class_noobj_loss]
+            loss = [boxes_loss,class_probs_loss,obj_confidence_loss,noobj_confidence_loss]
             loop_vars = [tf.constant(0),object_num,loss,label,predict]
 
             # 对一张图片label包含的物体，分别进行计算loss

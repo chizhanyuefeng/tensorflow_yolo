@@ -22,7 +22,7 @@ if __name__ =='__main__':
     # print(sess.run(a))
     a = tf.ones([1,2,3,4],tf.float32)
     b = tf.constant([1,0,3,4],tf.float32)
-    c = a+b
+    c = 2-a
     #b = tf.transpose(a,[1,2,3,0])
 
     sess = tf.Session()
