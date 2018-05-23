@@ -6,7 +6,7 @@ class YoloTinyNet(Net):
 
     def __init__(self):
         super(YoloTinyNet,self).__init__()
-        self._cfg_file_path = '../../cfg/tiny-yolo.cfg'
+        self._cfg_file_path = '../../cfg/yolo_tiny.cfg'
         self._model_path = '../../weights/YOLO_tiny.ckpt'
         self._net_name = 'Yolo tiny net'
         self._construct_graph()
