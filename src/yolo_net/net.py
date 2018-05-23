@@ -536,10 +536,10 @@ class Net(object):
         label = labels[num]
 
         '''找到该物体在7×7格子中所占的位置,最终生成的object_loc shape=[7,7],其中物体所占格子为1,其余为0'''
-        min_x = (label[0]-label[2]/2)/(self._input_size/self._cell_size)
-        max_x = (label[0]+label[2]/2)/(self._input_size/self._cell_size)
-        min_y = (label[1]-label[3]/2)/(self._input_size/self._cell_size)
-        max_y = (label[1]+label[3]/2)/(self._input_size/self._cell_size)
+        min_x = (label[0] - label[2] / 2) / (self._input_size / self._cell_size)
+        max_x = (label[0] + label[2] / 2) / (self._input_size / self._cell_size)
+        min_y = (label[1] - label[3] / 2) / (self._input_size / self._cell_size)
+        max_y = (label[1] + label[3] / 2) / (self._input_size / self._cell_size)
 
         # 对min值进行向下取整，对max值进行向上取整
         min_x = tf.floor(min_x)
@@ -555,24 +555,24 @@ class Net(object):
         object_cells = tf.reshape(object_cells, (7, 7, 1))
 
         '''找到物体中心坐标所在格子,response shape = [7,7],中心点所在格子为1,其余为0'''
-        centre_x = tf.floor(label[0]/(self._input_size/self._cell_size))
-        centre_y = tf.floor(label[1]/(self._input_size/self._cell_size))
+        centre_x = tf.floor(label[0] / (self._input_size / self._cell_size))
+        centre_y = tf.floor(label[1] / (self._input_size / self._cell_size))
 
-        response = tf.ones([1,1],tf.float32)
-        padding = tf.cast(tf.stack([centre_y,self._cell_size-centre_y-1,centre_x,self._cell_size-centre_x-1]),tf.int32)
+        response = tf.ones([1, 1], tf.float32)
+        padding = tf.cast(tf.stack([centre_y, self._cell_size-centre_y-1, centre_x, self._cell_size-centre_x-1]), tf.int32)
         padding = tf.reshape(padding, (2, 2))
-        response = tf.pad(response,padding)
+        response = tf.pad(response, padding)
 
         '''将预测的boxes数据转为绝对数据'''
-        cell_length = self._input_size/self._cell_size
-        predict_boxes = predict_boxes*[cell_length,cell_length,self._input_size,self._input_size]
-        coord_size = np.zeros([7,7,4])
+        cell_length = self._input_size / self._cell_size
+        predict_boxes = predict_boxes * [cell_length, cell_length, self._input_size, self._input_size]
+        coord_size = np.zeros([7, 7, 4])
 
         for i in range(self._cell_size):
             for j in range(self._cell_size):
-                coord_size[i,j,:] = [j*cell_length,i*cell_length,0,0]
+                coord_size[i, j, :] = [j*cell_length, i*cell_length, 0, 0]
         # 将shape扩充为[7,7,2,4]
-        coord_size = np.tile(coord_size.reshape([7,7,1,4]),[1,1,self._boxes_per_cell,1])
+        coord_size = np.tile(coord_size.reshape([7, 7, 1, 4]), [1, 1, self._boxes_per_cell, 1])
         predict_boxes = predict_boxes + coord_size
 
         '''计算iou'''
@@ -604,7 +604,7 @@ class Net(object):
         label_y = label[1]
         label_sqrt_w = tf.sqrt(label[2])
         label_sqrt_h = tf.sqrt(label[3])
-        label_probs = tf.one_hot(tf.cast(label[4],tf.int32), self._classes_num, dtype=tf.float32)
+        label_probs = tf.one_hot(tf.cast(label[4], tf.int32), self._classes_num, dtype=tf.float32)
 
         '''计算loss'''
         class_probs_loss = tf.nn.l2_loss(object_cells * (predict_probs - label_probs)) * self.__class_scale
@@ -621,7 +621,7 @@ class Net(object):
         losses = [loss[0] + boxes_loss, loss[1] + class_probs_loss, loss[2] + confidences_loss, loss[3] + noobj_confidences_loss]
         num = num+1
 
-        return num,object_num,losses,labels,predict
+        return num, object_num, losses, labels, predict
 
 
     def __train_iou(self,predict,label):
@@ -666,12 +666,12 @@ class Net(object):
         :return:
         '''
 
-        boxes_loss = tf.constant(0,tf.float32)
-        class_probs_loss = tf.constant(0,tf.float32)
-        obj_confidence_loss = tf.constant(0,tf.float32)
-        noobj_confidence_loss = tf.constant(0,tf.float32)
+        boxes_loss = tf.constant(0, tf.float32)
+        class_probs_loss = tf.constant(0, tf.float32)
+        obj_confidence_loss = tf.constant(0, tf.float32)
+        noobj_confidence_loss = tf.constant(0, tf.float32)
 
-        losses = [0,0,0,0]
+        losses = [0, 0, 0, 0]
         # 对每个batch分别进行进算loss
         for i in range(self.__batch_size):
             predict = self._net_output[i]
@@ -696,11 +696,11 @@ class Net(object):
         网络训练
         :return:
         '''
-        labels = np.zeros((1,20,5),np.float32)
+        labels = np.zeros((1, 20, 5), np.float32)
 
-        labels[:, 0] = [108.18402777777779, 269.15432098765433, 114.91666666666667, 248.11111111111111, 11],
-        labels[:, 1] = [308.02430555555554, 81.49382716049382, 130.08333333333334, 85.55555555555556, 6]
-        labels[:, 2] = [145.22569444444446, 191.29012345679013, 261.9166666666667, 227.88888888888889, 1]
+        labels[:, 0] = [108.1, 269.1, 114.9, 248.1, 11]
+        labels[:, 1] = [308.0, 81.4, 130.0, 85.6, 6]
+        labels[:, 2] = [145.2, 191.2, 261.9, 227.9, 1]
         self.__total_losses = self.__loss()
 
         train_option = self.__train_optimize(self.__total_losses)
