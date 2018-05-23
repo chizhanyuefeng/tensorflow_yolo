@@ -547,7 +547,7 @@ class Net(object):
         max_x = tf.ceil(max_x)
         max_y = tf.ceil(max_y)
 
-        temp = tf.cast((max_y - min_y, max_x - min_x), tf.int32)
+        temp = tf.cast(tf.stack((max_y - min_y, max_x - min_x)), tf.int32)
         object_cells = tf.ones(temp, tf.float32)
         padding = tf.cast(tf.stack([min_y, self._cell_size-max_y, min_x, self._cell_size-max_x]), tf.int32)
         padding = tf.reshape(padding, (2, 2))
@@ -565,7 +565,7 @@ class Net(object):
 
         '''将预测的boxes数据转为绝对数据'''
         cell_length = self._input_size / self._cell_size
-        predict_boxes = predict_boxes * [cell_length, cell_length, self._input_size, self._input_size]
+        predict_absolute_boxes = predict_boxes * [cell_length, cell_length, self._input_size, self._input_size]
         coord_size = np.zeros([7, 7, 4])
 
         for i in range(self._cell_size):
@@ -573,11 +573,12 @@ class Net(object):
                 coord_size[i, j, :] = [j*cell_length, i*cell_length, 0, 0]
         # 将shape扩充为[7,7,2,4]
         coord_size = np.tile(coord_size.reshape([7, 7, 1, 4]), [1, 1, self._boxes_per_cell, 1])
-        predict_boxes = predict_boxes + coord_size
+        predict_absolute_boxes = predict_absolute_boxes + coord_size
 
         '''计算iou'''
-        iou = self.__train_iou(predict_boxes, label)
+        iou = self.__train_iou(predict_absolute_boxes, label)
         iou = tf.reshape(iou, (7, 7, 2))
+        self.iou = iou
 
         '''找到对应物体负责（response）的格子的iou '''
         response = tf.reshape(response, (7, 7, 1))
@@ -600,10 +601,10 @@ class Net(object):
         predict_probs = classes_probs
 
         # 提取label数据用于计算loss
-        label_x = label[0]
-        label_y = label[1]
-        label_sqrt_w = tf.sqrt(label[2])
-        label_sqrt_h = tf.sqrt(label[3])
+        label_x = (label[0] + label[2] / 2) / self._input_size
+        label_y = (label[1] + label[3] / 2) / self._input_size
+        label_sqrt_w = tf.sqrt(label[2] / self._input_size)
+        label_sqrt_h = tf.sqrt(label[3] / self._input_size)
         label_probs = tf.one_hot(tf.cast(label[4], tf.int32), self._classes_num, dtype=tf.float32)
 
         '''计算loss'''
@@ -647,7 +648,7 @@ class Net(object):
         right_min_coord = tf.minimum(predict[:, :, :, 2:],label[2:])
 
         inter = right_min_coord - left_max_coord
-        filter = tf.cast(inter[:, :, :, 0] > 0, tf.float32)
+        filter = tf.cast(inter[:, :, :, 0] > 0, tf.float32) * tf.cast(inter[:, :, :, 1] > 0, tf.float32)
         # 交叉面积
         inter_area = inter[:, :, :, 0] * inter[:, :, :, 1] * filter
         # 预测面积
@@ -671,7 +672,7 @@ class Net(object):
         obj_confidence_loss = tf.constant(0, tf.float32)
         noobj_confidence_loss = tf.constant(0, tf.float32)
 
-        losses = [0, 0, 0, 0]
+        losses = [tf.constant(0.0), tf.constant(0.0), tf.constant(0.0), tf.constant(0.0)]
         # 对每个batch分别进行进算loss
         for i in range(self.__batch_size):
             predict = self._net_output[i]
@@ -683,10 +684,17 @@ class Net(object):
 
             # 对一张图片label包含的物体，分别进行计算loss
             output = tf.while_loop(self.__cond, self.__body, loop_vars=loop_vars)
-            losses = losses + output[2]
+            losses[0] = losses[0] + output[2][0]
+            losses[1] = losses[1] + output[2][1]
+            losses[2] = losses[2] + output[2][2]
+            losses[3] = losses[3] + output[2][3]
 
         avg_losses = tf.reduce_sum(losses) / self.__batch_size
         tf.add_to_collection('losses', avg_losses)
+        self.boxes_loss = losses[0]
+        self.class_probs_loss = losses[1]
+        self.obj_confidence_loss = losses[2]
+        self.noobj_confidence_loss = losses[3]
 
         return tf.add_n(tf.get_collection('losses'))
 
@@ -713,7 +721,9 @@ class Net(object):
 
             for step in range(self.__max_iterators):
                 feed_dict = {self._image_input_tensor : image_input, self.__labels : labels, self.__labels_objects_num : [[3]]}
-                _, loss = sess.run([train_option, self.__total_losses], feed_dict=feed_dict)
-                if step % 100 == 0:
-                    print('loss', loss)
-                assert not np.isnan(loss), 'Model diverged with loss = NaN'
+                _, loss, boxes_loss, class_probs_loss, obj_confidence_loss, noobj_confidence_loss= sess.run([train_option, self.__total_losses, self.boxes_loss, self.class_probs_loss, self.obj_confidence_loss, self.noobj_confidence_loss], feed_dict=feed_dict)
+                #if step % 100 == 0:
+                print('loss', loss)
+                print('1,2,3,4',boxes_loss, class_probs_loss, obj_confidence_loss, noobj_confidence_loss)
+                #print('iou',iou)
+                #assert not np.isnan(loss), 'Model diverged with loss = NaN'
