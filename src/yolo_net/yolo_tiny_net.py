@@ -18,15 +18,10 @@ if __name__ =='__main__':
     #tiny.test('../../data/2.jpg')
     tiny.train()
 
-    # a = tf.zeros([3,3,2])
+    # a = tf.ones([3,3,2])
     # sess = tf.Session()
-    # a[2, 2, :] = [1, 2]
-    # print(sess.run(a))
-    # a = tf.ones([1,2,3,4],tf.float32)
-    # b = tf.constant([1,0,3,4],tf.float32)
-    # c = 2-a
-    # #b = tf.transpose(a,[1,2,3,0])
+    # b = a[:,:,1]
     #
     # sess = tf.Session()
-
-    #print(sess.run(c))
+    #
+    # print(sess.run(tf.shape(b)))
