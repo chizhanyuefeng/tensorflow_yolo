@@ -7,7 +7,7 @@ import utils.cfg_file_parser as cp
 
 from tensorflow.python import pywrap_tensorflow
 
-WIGHTS_NAME = 0
+WIGHTS_NAME = 1
 
 class Net(object):
     '''
@@ -19,6 +19,7 @@ class Net(object):
 
     _model_path = None
     _net_name = None
+
 
     classes = ["aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow", "diningtable",
                "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
@@ -175,6 +176,7 @@ class Net(object):
         #self.__leaky_alpha = float(train_params['leaky_alpha'])
         self.__learning_rate = float(train_params['learning_rate'])
         self.__max_iterators = int(train_params['max_iterators'])
+        self.__model_save_path = str(train_params['model_save_path'])
 
         # 输入标签，5 = [x,y,w,h,c]
         self.__labels = tf.placeholder(tf.float32,(self.__batch_size,self.__max_objects_per_image,5))
@@ -482,10 +484,10 @@ class Net(object):
         return cross_area / (bbox1_area + bbox2_area - cross_area)
 
     def __show_result(self,classes,bboxes,scores):
-        '''
+        """
         显示结果
         :return:
-        '''
+        """
         image = self._image.copy()
         for i in range(len(bboxes)):
             for j in range(len(bboxes[i])):
@@ -498,16 +500,21 @@ class Net(object):
         cv2.waitKey(3000)
 
     def __train_optimize(self,loss):
-        '''
+        """
         网络训练
         :param loss:
         :return:
-        '''
-        train_option = tf.train.MomentumOptimizer(self.__learning_rate,self.__momentum).minimize(loss)
+        """
+        #train_option = tf.train.MomentumOptimizer(self.__learning_rate,self.__momentum).minimize(loss)
+        train_option = tf.train.AdamOptimizer(self.__learning_rate).minimize(loss)
+        # train_option = tf.train.MomentumOptimizer(self.__learning_rate, self.__momentum)
+        # grads = train_option.compute_gradients(loss)
+        #
+        # apply_gradient_op = train_option.apply_gradients(grads)
         return train_option
 
     def __cond(self,num,object_num,loss,labels,predict):
-        '''
+        """
         循环的条件函数
         :param num: 当前执行的次数
         :param object_num: 当前计算的image包含的obj个数
@@ -515,7 +522,7 @@ class Net(object):
         :param labels: [[x,y,w,h,c]]*n
         :param predict: 当前图片的预测值
         :return:
-        '''
+        """
 
         return num < object_num
 
@@ -706,6 +713,7 @@ class Net(object):
         :return:
         '''
 
+        self._net_output = self._net_output
         labels = np.zeros((1, 20, 5), np.float32)
 
         labels[:, 0] = [108.1, 269.1, 114.9, 248.1, 11]
@@ -716,15 +724,18 @@ class Net(object):
         train_option = self.__train_optimize(self.__total_losses)
 
         image_input = self.img2yoloimg('../../data/dog.jpg')
+        sess = self.__get_session()
+        sess.run(tf.global_variables_initializer())
 
-        self.__get_session().run(tf.global_variables_initializer())
-
+        saver = tf.train.Saver()
 
         for step in range(self.__max_iterators):
             feed_dict = {self._image_input_tensor : image_input, self.__labels : labels, self.__labels_objects_num : [[3]]}
-            _, loss, boxes_loss, class_probs_loss, obj_confidence_loss, noobj_confidence_loss= self.__get_session().run([train_option, self.__total_losses, self.boxes_loss, self.class_probs_loss, self.obj_confidence_loss, self.noobj_confidence_loss], feed_dict=feed_dict)
-            #if step % 100 == 0:
-            print('loss', loss)
-            print('1,2,3,4',boxes_loss, class_probs_loss, obj_confidence_loss, noobj_confidence_loss)
-            #print('iou',iou)
-            #assert not np.isnan(loss), 'Model diverged with loss = NaN'
+            run = [train_option, self.__total_losses, self.boxes_loss, self.class_probs_loss, self.obj_confidence_loss, self.noobj_confidence_loss, self._net_output]
+            _,loss, boxes_loss, class_probs_loss, obj_confidence_loss, noobj_confidence_loss, output= sess.run(run, feed_dict=feed_dict)
+            if step % 100 == 0:
+                print('训练第%d次,tota loss = %g'%(step,loss))
+                print('          boxes_loss=%g,class_probs_loss=%g,obj_confidence_loss=%g,obj_confidence_loss=%g'%(boxes_loss, class_probs_loss, obj_confidence_loss, noobj_confidence_loss))
+            #if step % 1000 ==0:
+                save_path = saver.save(sess, self.__model_save_path)
+                print("          权重保存至:%s" % (save_path))
