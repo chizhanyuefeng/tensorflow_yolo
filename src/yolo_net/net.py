@@ -5,6 +5,7 @@ import numpy as np
 import tensorflow as tf
 import utils.cfg_file_parser as cp
 import logging
+import progressbar as pb
 
 from tensorflow.python import pywrap_tensorflow
 
@@ -168,14 +169,20 @@ class Net(object):
         self.train_logger = logging.getLogger('train')
         self.train_logger.setLevel(logging.DEBUG)
 
-        # 设置log输出的文件
+        # 添加文件输出
         log_file = '../../train_log/' + time.strftime('%Y%m%d%H%M', time.localtime(time.time()))
-        log_handler = logging.FileHandler(log_file, mode='w')
-        log_handler.setLevel(logging.DEBUG)
-        # 设置输出格式
-        formatter = logging.Formatter("%(asctime)s - %(filename)s[line:%(lineno)d] - %(levelname)s: %(message)s")
-        log_handler.setFormatter(formatter)
-        self.train_logger.addHandler(log_handler)
+        file_handler = logging.FileHandler(log_file, mode='w')
+        file_handler.setLevel(logging.DEBUG)
+        file_formatter = logging.Formatter('%(asctime)s - %(filename)s[line:%(lineno)d] - %(levelname)s: %(message)s')
+        file_handler.setFormatter(file_formatter)
+        self.train_logger.addHandler(file_handler)
+
+        # 添加控制台输出
+        consol_handler = logging.StreamHandler()
+        consol_handler.setLevel(logging.DEBUG)
+        consol_formatter = logging.Formatter('%(message)s')
+        consol_handler.setFormatter(consol_formatter)
+        self.train_logger.addHandler(consol_handler)
 
     def __load_train_params(self, train_params):
         '''
@@ -227,7 +234,7 @@ class Net(object):
         else:
             self._image_input_tensor = tf.placeholder(tf.float32, shape=[None,self._input_size,self._input_size,3])
 
-        print('开始构建yolo网络...')
+        self.train_logger.info('开始构建yolo网络...')
         self._net_output = self._image_input_tensor
 
         # 从网络结构配置加载参数，进而构建网络
@@ -343,9 +350,9 @@ class Net(object):
         '''
 
         # 获取每个类的概率值,置信度,bbox
-        classes_probs = tf.reshape(output[0:7*7*20],[7,7,20])
-        confidences = tf.reshape(output[7*7*20:7*7*22],[7,7,2])
-        boxes = tf.reshape(output[7*7*22:],[7,7,2,4])
+        classes_probs = tf.reshape(output[0:7*7*20], [7, 7, 20])
+        confidences = tf.reshape(output[7*7*20:7*7*22], [7, 7, 2])
+        boxes = tf.reshape(output[7*7*22:], [7, 7, 2, 4])
 
         # 将每个类的概率和置信度相乘得到scores
         confidence_scores_list = []
@@ -355,12 +362,12 @@ class Net(object):
                 confidence_scores_list.append(temp)
 
         # 得分过滤器,shape = [7,7,2,20]，找到大于阈值的得分，并保存其所在位置。
-        confidence_scores = tf.reshape(tf.transpose(tf.stack(confidence_scores_list),[1,2,0]),[7,7,2,20])
-        score_filter = confidence_scores>=self._score_threshold
+        confidence_scores = tf.reshape(tf.transpose(tf.stack(confidence_scores_list), [1, 2, 0]), [7, 7, 2, 20])
+        score_filter = confidence_scores >= self._score_threshold
         # filter 的shape = [N,4]，其中N为多少个符合阈值的数据，4为其数据坐在confidence_scores的每一维度数据
         filter = tf.where(score_filter)
 
-        output = self.__get_session().run([filter,confidences,boxes], feed_dict={self._image_input_tensor: self._image_inputs})
+        output = self.__get_session().run([filter, confidences, boxes], feed_dict={self._image_input_tensor: self._image_inputs})
         output_filter = output[0]
         output_confidences = output[1]
         output_bboxes = output[2]
@@ -375,13 +382,13 @@ class Net(object):
         if not output_filter.any():
             print('没有检测出任何物体')
             return None
-
+        print('filter', len(output_filter), self._score_threshold)
         # 通过过滤器来获取类别，bbox，cell，score
         for i in range(len(output_filter)):
             temp = output_filter[i]
             filtered_classes.append(output_filter[i][3])
             filtered_boxes.append(output_bboxes[temp[0]][temp[1]][temp[2]][:])
-            filtered_cell.append([temp[0],temp[1]])
+            filtered_cell.append([temp[0], temp[1]])
             filtered_score.append(output_confidences[temp[0]][temp[1]][temp[2]])
 
         output_classes = []
@@ -391,14 +398,14 @@ class Net(object):
 
         # 数据分类
         for i in range(20):
-            index = np.argwhere(np.array(filtered_classes)==i).reshape([-1])
-            if index.size==0:
+            index = np.argwhere(np.array(filtered_classes) == i).reshape([-1])
+            if index.size == 0:
                 continue
             # 每个类的类别
             temp = np.array(filtered_classes)[index].reshape([-1])
             output_classes.append(temp)
             # 每个类中每个检测对象的bbox
-            temp = np.array(filtered_boxes)[index].reshape([-1,4])
+            temp = np.array(filtered_boxes)[index].reshape([-1, 4])
             output_boxes.append(temp)
             # 每个类中每个检测对象的bbox所在的cell
             temp = np.array(filtered_cell)[index].reshape([-1, 2])
@@ -412,14 +419,17 @@ class Net(object):
         result_scores = []
 
         for i in range(len(output_classes)):
-            classes, bboxes, scores=self.__interpert_result(output_classes[i],output_boxes[i],output_cell[i],output_scores[i])
+            classes, bboxes, scores = self.__interpert_result(output_classes[i],
+                                                              output_boxes[i],
+                                                              output_cell[i],
+                                                              output_scores[i])
             result_classes.append(classes)
             result_bboxes.append(bboxes)
             result_scores.append(scores)
 
-        return result_classes,result_bboxes,result_scores
+        return result_classes, result_bboxes, result_scores
 
-    def __interpert_result(self,classes,bboxes,cell,scores):
+    def __interpert_result(self, classes, bboxes, cell, scores):
         '''
         解析输出结果的每个类的阈值
         :param classes:
@@ -445,17 +455,20 @@ class Net(object):
             bboxes[i] = self.__bbox_pos(celles[i], bboxes[i])
         # 通过非极大抑制，来筛选iou
         for i in range(len(classes)):
-            if i==len(classes)-1:
+            if i == len(classes)-1:
                 break
             else:
-                for j in range(i+1,len(classes)):
-                    iou = self.__test_iou(bboxes[i],bboxes[j])
-                    if iou>=self._iou_threshold:
-                        scores[j]=0
+                for j in range(i+1, len(classes)):
+                    iou = self.__test_iou(bboxes[i], bboxes[j])
+                    #print(iou)
+                    if iou == 1:
+                        scores[j] = 0
+                    elif iou >= self._iou_threshold:
+                        scores[j] = 0
 
-        return classes,bboxes,scores
+        return classes, bboxes, scores
 
-    def __bbox_pos(self,cell,bbox):
+    def __bbox_pos(self, cell, bbox):
         '''
         将相对坐标转化为绝对坐标
         :param cell:
@@ -475,9 +488,9 @@ class Net(object):
         center_x = bbox[0]*cell_width + cell_width*cell[1]
         center_y = bbox[1]*cell_height + cell_height*cell[0]
 
-        return [center_x-half_bw,center_y-half_bh,center_x+half_bw,center_y+half_bh]
+        return [center_x-half_bw, center_y-half_bh, center_x+half_bw, center_y+half_bh]
 
-    def __test_iou(self,bbox1,bbox2):
+    def __test_iou(self, bbox1, bbox2):
         '''
         计算iou
         :param bbox1: [left_top_x,left_top_y,right_bottom_x,right_bottom_y]
@@ -517,6 +530,12 @@ class Net(object):
                     cv2.rectangle(image, (int(bboxes[i][j][0]), int(bboxes[i][j][1] - 20)), (int(bboxes[i][j][2]), int(bboxes[i][j][1])), (125, 125, 125), -1)
                     cv2.putText(image, self.classes[classes[i][j]] + ' : %.2f' % scores[i][j], (int(bboxes[i][j][0]+5), int(bboxes[i][j][1]-7)),
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1)
+                    print('object=[%s],bbox=[%d,%d,%d,%d,],得分=[%f]'%(self.classes[classes[i][j]],
+                                                                     bboxes[i][j][0],
+                                                                     bboxes[i][j][1],
+                                                                     bboxes[i][j][2],
+                                                                     bboxes[i][j][3],
+                                                                     scores[i][j]))
         cv2.imshow(self._net_name+'detection', image)
         cv2.waitKey(3000)
 
@@ -749,14 +768,19 @@ class Net(object):
         sess.run(tf.global_variables_initializer())
 
         saver = tf.train.Saver()
+        print('开始训练:')
+        pbar = pb.ProgressBar(maxval=self.__max_iterators, widgets=['训练进度', pb.Bar('=', '[', ']'), '', pb.Percentage()])
 
         for step in range(self.__max_iterators):
+            pbar.update(step + 1)
+
             feed_dict = {self._image_input_tensor : image_input, self.__labels : labels, self.__labels_objects_num : [[3]]}
             run = [train_option, self.__total_losses, self.boxes_loss, self.class_probs_loss, self.obj_confidence_loss, self.noobj_confidence_loss, self._net_output]
             _,loss, boxes_loss, class_probs_loss, obj_confidence_loss, noobj_confidence_loss, output= sess.run(run, feed_dict=feed_dict)
             if (step+1) % 100 == 0:
-                self.train_logger.debug('训练第%d次,tota loss = %f'%(step+1,loss))
-                self.train_logger.debug('    boxes_loss=%f,class_probs_loss=%f,obj_confidence_loss=%f,obj_confidence_loss=%f'%(boxes_loss, class_probs_loss, obj_confidence_loss, noobj_confidence_loss))
+                self.train_logger.info('训练第%d次,tota loss = %f'%(step+1,loss))
+                self.train_logger.info('    boxes_loss=%f,class_probs_loss=%f,obj_confidence_loss=%f,obj_confidence_loss=%f'%(boxes_loss, class_probs_loss, obj_confidence_loss, noobj_confidence_loss))
             if (step+1) % 1000 ==0:
                 save_path = saver.save(sess, self.__model_save_path)
-                self.train_logger.debug("训练第%d次，权重保存至:%s" % (step+1,save_path))
+                self.train_logger.info("训练第%d次，权重保存至:%s" % (step+1,save_path))
+        pbar.finish()
