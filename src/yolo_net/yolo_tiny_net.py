@@ -7,7 +7,7 @@ class YoloTinyNet(Net):
     def __init__(self, trainable = False):
         super(YoloTinyNet,self).__init__()
         self._cfg_file_path = '../../cfg/yolo_tiny.cfg'
-        self._model_path = '../../weights/YOLO_tiny.ckpt'
+        self._model_path = '../../weights/yolo_tiny/model.ckpt'#'../../weights/YOLO_tiny.ckpt'
         self._net_name = 'Yolo tiny net'
         self._trainable = trainable
         self._construct_graph()
@@ -15,7 +15,7 @@ class YoloTinyNet(Net):
 
 if __name__ =='__main__':
     tiny = YoloTinyNet(True)
-    #tiny.test('../../data/2.jpg')
+    # tiny.test('../../data/dog.jpg')
     tiny.train()
 
     # a = tf.ones([20])
@@ -26,3 +26,5 @@ if __name__ =='__main__':
     # sess.run(tf.global_variables_initializer())
     #
     # print(sess.run(b))
+
+

@@ -4,6 +4,7 @@ import cv2
 import numpy as np
 import tensorflow as tf
 import utils.cfg_file_parser as cp
+import logging
 
 from tensorflow.python import pywrap_tensorflow
 
@@ -159,6 +160,23 @@ class Net(object):
         return tf.Variable(tf.constant(0.1, shape=shape), dtype=tf.float32)
 
 
+    def train_logger_init(self):
+        """
+        初始化log日志
+        :return:
+        """
+        self.train_logger = logging.getLogger('train')
+        self.train_logger.setLevel(logging.DEBUG)
+
+        # 设置log输出的文件
+        log_file = '../../train_log/' + time.strftime('%Y%m%d%H%M', time.localtime(time.time()))
+        log_handler = logging.FileHandler(log_file, mode='w')
+        log_handler.setLevel(logging.DEBUG)
+        # 设置输出格式
+        formatter = logging.Formatter("%(asctime)s - %(filename)s[line:%(lineno)d] - %(levelname)s: %(message)s")
+        log_handler.setFormatter(formatter)
+        self.train_logger.addHandler(log_handler)
+
     def __load_train_params(self, train_params):
         '''
         初始化训练参数和构建tensor
@@ -181,6 +199,9 @@ class Net(object):
         # 输入标签，5 = [x,y,w,h,c]
         self.__labels = tf.placeholder(tf.float32,(self.__batch_size,self.__max_objects_per_image,5))
         self.__labels_objects_num = tf.placeholder(tf.int32,[self.__batch_size,1])
+
+        # 初始化train log
+        self.train_logger_init()
 
     def _construct_graph(self):
         '''
@@ -734,8 +755,8 @@ class Net(object):
             run = [train_option, self.__total_losses, self.boxes_loss, self.class_probs_loss, self.obj_confidence_loss, self.noobj_confidence_loss, self._net_output]
             _,loss, boxes_loss, class_probs_loss, obj_confidence_loss, noobj_confidence_loss, output= sess.run(run, feed_dict=feed_dict)
             if (step+1) % 100 == 0:
-                print('训练第%d次,tota loss = %f'%(step+1,loss))
-                print('          boxes_loss=%f,class_probs_loss=%f,obj_confidence_loss=%f,obj_confidence_loss=%f'%(boxes_loss, class_probs_loss, obj_confidence_loss, noobj_confidence_loss))
+                self.train_logger.debug('训练第%d次,tota loss = %f'%(step+1,loss))
+                self.train_logger.debug('    boxes_loss=%f,class_probs_loss=%f,obj_confidence_loss=%f,obj_confidence_loss=%f'%(boxes_loss, class_probs_loss, obj_confidence_loss, noobj_confidence_loss))
             if (step+1) % 1000 ==0:
                 save_path = saver.save(sess, self.__model_save_path)
-                print("训练第%d次，权重保存至:%s" % (step+1,save_path))
+                self.train_logger.debug("训练第%d次，权重保存至:%s" % (step+1,save_path))
