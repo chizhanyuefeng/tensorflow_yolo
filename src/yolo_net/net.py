@@ -733,9 +733,9 @@ class Net(object):
             feed_dict = {self._image_input_tensor : image_input, self.__labels : labels, self.__labels_objects_num : [[3]]}
             run = [train_option, self.__total_losses, self.boxes_loss, self.class_probs_loss, self.obj_confidence_loss, self.noobj_confidence_loss, self._net_output]
             _,loss, boxes_loss, class_probs_loss, obj_confidence_loss, noobj_confidence_loss, output= sess.run(run, feed_dict=feed_dict)
-            if step % 100 == 0:
-                print('训练第%d次,tota loss = %g'%(step,loss))
-                print('          boxes_loss=%g,class_probs_loss=%g,obj_confidence_loss=%g,obj_confidence_loss=%g'%(boxes_loss, class_probs_loss, obj_confidence_loss, noobj_confidence_loss))
-            #if step % 1000 ==0:
+            if (step+1) % 100 == 0:
+                print('训练第%d次,tota loss = %f'%(step+1,loss))
+                print('          boxes_loss=%f,class_probs_loss=%f,obj_confidence_loss=%f,obj_confidence_loss=%f'%(boxes_loss, class_probs_loss, obj_confidence_loss, noobj_confidence_loss))
+            if (step+1) % 1000 ==0:
                 save_path = saver.save(sess, self.__model_save_path)
-                print("          权重保存至:%s" % (save_path))
+                print("训练第%d次，权重保存至:%s" % (step+1,save_path))
