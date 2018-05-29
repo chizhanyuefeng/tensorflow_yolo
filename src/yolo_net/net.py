@@ -234,7 +234,7 @@ class Net(object):
         else:
             self._image_input_tensor = tf.placeholder(tf.float32, shape=[None,self._input_size,self._input_size,3])
 
-        self.train_logger.info('开始构建yolo网络...')
+        print('开始构建yolo网络...')
         self._net_output = self._image_input_tensor
 
         # 从网络结构配置加载参数，进而构建网络
@@ -477,8 +477,8 @@ class Net(object):
         '''
 
         # 计算bbox的1/2的宽度和高度
-        half_bw = self._image_width*bbox[2]*bbox[2]/2
-        half_bh = self._image_height*bbox[3]*bbox[3]/2
+        half_bw = self._image_width * bbox[2] / 2
+        half_bh = self._image_height * bbox[3] / 2
 
         # 计算原始大小的图片每个cell的宽和高
         cell_width = self._image_width/self._cell_size
@@ -649,8 +649,8 @@ class Net(object):
         predict_probs = classes_probs
 
         '''提取label数据用于计算loss'''
-        label_x = (label[0] + label[2] / 2) / self._input_size
-        label_y = (label[1] + label[3] / 2) / self._input_size
+        label_x = (label[0] + label[2] / 2) % (self._input_size / self._cell_size)
+        label_y = (label[1] + label[3] / 2) % (self._input_size / self._cell_size)
         label_sqrt_w = tf.sqrt(label[2] / self._input_size)
         label_sqrt_h = tf.sqrt(label[3] / self._input_size)
         label_probs = tf.one_hot(tf.cast(label[4], tf.int32), self._classes_num, dtype=tf.float32)
@@ -769,18 +769,18 @@ class Net(object):
 
         saver = tf.train.Saver()
         print('开始训练:')
-        pbar = pb.ProgressBar(maxval=self.__max_iterators, widgets=['训练进度', pb.Bar('=', '[', ']'), '', pb.Percentage()])
+        #pbar = pb.ProgressBar(maxval=self.__max_iterators, widgets=['训练进度', pb.Bar('=', '[', ']'), '', pb.Percentage()])
 
         for step in range(self.__max_iterators):
-            pbar.update(step + 1)
+            #pbar.update(step + 1)
 
             feed_dict = {self._image_input_tensor : image_input, self.__labels : labels, self.__labels_objects_num : [[3]]}
             run = [train_option, self.__total_losses, self.boxes_loss, self.class_probs_loss, self.obj_confidence_loss, self.noobj_confidence_loss, self._net_output]
-            _,loss, boxes_loss, class_probs_loss, obj_confidence_loss, noobj_confidence_loss, output= sess.run(run, feed_dict=feed_dict)
+            _, loss, boxes_loss, class_probs_loss, obj_confidence_loss, noobj_confidence_loss, output= sess.run(run, feed_dict=feed_dict)
             if (step+1) % 100 == 0:
-                self.train_logger.info('训练第%d次,tota loss = %f'%(step+1,loss))
-                self.train_logger.info('    boxes_loss=%f,class_probs_loss=%f,obj_confidence_loss=%f,obj_confidence_loss=%f'%(boxes_loss, class_probs_loss, obj_confidence_loss, noobj_confidence_loss))
-            if (step+1) % 1000 ==0:
+                self.train_logger.info('训练第%d次,tota loss = %f'%(step+1, loss))
+                self.train_logger.info('    boxes_loss=%f,class_probs_loss=%f,obj_confidence_loss=%f,noobj_confidence_loss=%f'%(boxes_loss, class_probs_loss, obj_confidence_loss, noobj_confidence_loss))
+            if (step+1) % 1000 == 0:
                 save_path = saver.save(sess, self.__model_save_path)
-                self.train_logger.info("训练第%d次，权重保存至:%s" % (step+1,save_path))
-        pbar.finish()
+                self.train_logger.info("训练第%d次，权重保存至:%s" % (step+1, save_path))
+        #pbar.finish()
