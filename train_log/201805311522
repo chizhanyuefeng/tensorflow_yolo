@@ -1,0 +1,42 @@
+2018-05-31 15:22:48,563 - net.py[line:810] - INFO: 开始训练:
+2018-05-31 15:23:08,974 - net.py[line:823] - INFO: 训练第100次,tota loss = 466873.687500
+2018-05-31 15:23:08,975 - net.py[line:824] - INFO:     x_loss=3139.140381, y_loss=25.619221, w_loss=169.677673, h_loss=2012.977783
+2018-05-31 15:23:08,975 - net.py[line:825] - INFO:     class_probs_loss=287021.312500,obj_confidence_loss=5456.118164,noobj_confidence_loss=168966.765625
+2018-05-31 15:23:08,975 - net.py[line:826] - INFO:     accuracy_x=0.481776, accuracy_y=1.110030, accuracy_w=-65.389626, accuracy_h=6.015293
+2018-05-31 15:23:23,051 - net.py[line:823] - INFO: 训练第200次,tota loss = 4246.890137
+2018-05-31 15:23:23,052 - net.py[line:824] - INFO:     x_loss=2.572884, y_loss=0.999992, w_loss=1.423025, h_loss=2.520365
+2018-05-31 15:23:23,052 - net.py[line:825] - INFO:     class_probs_loss=1830.906250,obj_confidence_loss=54.795372,noobj_confidence_loss=2273.626953
+2018-05-31 15:23:23,052 - net.py[line:826] - INFO:     accuracy_x=0.990085, accuracy_y=0.978311, accuracy_w=0.343535, accuracy_h=0.351075
+2018-05-31 15:23:37,153 - net.py[line:823] - INFO: 训练第300次,tota loss = 100.291550
+2018-05-31 15:23:37,153 - net.py[line:824] - INFO:     x_loss=0.010470, y_loss=0.001021, w_loss=0.008235, h_loss=0.010842
+2018-05-31 15:23:37,153 - net.py[line:825] - INFO:     class_probs_loss=7.358782,obj_confidence_loss=0.191367,noobj_confidence_loss=13.450871
+2018-05-31 15:23:37,153 - net.py[line:826] - INFO:     accuracy_x=0.999035, accuracy_y=0.999994, accuracy_w=1.119372, accuracy_h=0.952893
+2018-05-31 15:23:51,248 - net.py[line:823] - INFO: 训练第400次,tota loss = 79.113029
+2018-05-31 15:23:51,248 - net.py[line:824] - INFO:     x_loss=0.000018, y_loss=0.001367, w_loss=0.001285, h_loss=0.000762
+2018-05-31 15:23:51,249 - net.py[line:825] - INFO:     class_probs_loss=0.065821,obj_confidence_loss=0.001034,noobj_confidence_loss=0.070869
+2018-05-31 15:23:51,249 - net.py[line:826] - INFO:     accuracy_x=0.999971, accuracy_y=0.999957, accuracy_w=1.013188, accuracy_h=1.024476
+2018-05-31 15:24:05,326 - net.py[line:823] - INFO: 训练第500次,tota loss = 78.908119
+2018-05-31 15:24:05,326 - net.py[line:824] - INFO:     x_loss=0.000324, y_loss=0.000552, w_loss=0.000154, h_loss=0.000088
+2018-05-31 15:24:05,326 - net.py[line:825] - INFO:     class_probs_loss=0.025534,obj_confidence_loss=0.000316,noobj_confidence_loss=0.007868
+2018-05-31 15:24:05,326 - net.py[line:826] - INFO:     accuracy_x=1.000089, accuracy_y=1.000035, accuracy_w=0.984660, accuracy_h=1.008964
+2018-05-31 15:24:19,414 - net.py[line:823] - INFO: 训练第600次,tota loss = 9765.783203
+2018-05-31 15:24:19,415 - net.py[line:824] - INFO:     x_loss=313.431335, y_loss=35.904633, w_loss=630.799683, h_loss=75.695602
+2018-05-31 15:24:19,415 - net.py[line:825] - INFO:     class_probs_loss=7000.610352,obj_confidence_loss=3.958858,noobj_confidence_loss=1626.541138
+2018-05-31 15:24:19,415 - net.py[line:826] - INFO:     accuracy_x=0.850280, accuracy_y=0.967246, accuracy_w=-9.325450, accuracy_h=-18.640879
+2018-05-31 15:24:33,503 - net.py[line:823] - INFO: 训练第700次,tota loss = 1402977.750000
+2018-05-31 15:24:33,503 - net.py[line:824] - INFO:     x_loss=70563.132812, y_loss=5449.221191, w_loss=55331.000000, h_loss=30211.101562
+2018-05-31 15:24:33,503 - net.py[line:825] - INFO:     class_probs_loss=1098429.625000,obj_confidence_loss=408.417999,noobj_confidence_loss=142506.328125
+2018-05-31 15:24:33,503 - net.py[line:826] - INFO:     accuracy_x=2.404804, accuracy_y=2.281951, accuracy_w=214.809418, accuracy_h=134.818390
+2018-05-31 15:24:47,601 - net.py[line:823] - INFO: 训练第800次,tota loss = 1274.150391
+2018-05-31 15:24:47,602 - net.py[line:824] - INFO:     x_loss=34.880569, y_loss=30.508152, w_loss=32.808174, h_loss=24.599529
+2018-05-31 15:24:47,602 - net.py[line:825] - INFO:     class_probs_loss=927.496338,obj_confidence_loss=4.255922,noobj_confidence_loss=140.770706
+2018-05-31 15:24:47,602 - net.py[line:826] - INFO:     accuracy_x=1.058496, accuracy_y=1.048720, accuracy_w=-1.731568, accuracy_h=5.066119
+2018-05-31 15:25:01,713 - net.py[line:823] - INFO: 训练第900次,tota loss = 2533.051514
+2018-05-31 15:25:01,714 - net.py[line:824] - INFO:     x_loss=14.182530, y_loss=18.347700, w_loss=51.977482, h_loss=1.539701
+2018-05-31 15:25:01,714 - net.py[line:825] - INFO:     class_probs_loss=1891.891968,obj_confidence_loss=1.997490,noobj_confidence_loss=474.284546
+2018-05-31 15:25:01,714 - net.py[line:826] - INFO:     accuracy_x=1.015886, accuracy_y=1.137443, accuracy_w=2.875293, accuracy_h=-4.798858
+2018-05-31 15:25:15,829 - net.py[line:823] - INFO: 训练第1000次,tota loss = 78.879692
+2018-05-31 15:25:15,830 - net.py[line:824] - INFO:     x_loss=0.000469, y_loss=0.001613, w_loss=0.000187, h_loss=0.000434
+2018-05-31 15:25:15,830 - net.py[line:825] - INFO:     class_probs_loss=0.037082,obj_confidence_loss=0.000383,noobj_confidence_loss=0.009161
+2018-05-31 15:25:15,830 - net.py[line:826] - INFO:     accuracy_x=1.000048, accuracy_y=1.000902, accuracy_w=0.991363, accuracy_h=1.005355
+2018-05-31 15:25:26,161 - net.py[line:829] - INFO: 训练第1000次，权重保存至:/home/tony/learning_yolo/yolo_v1/tensorflow_yolo_v1.git/weights/yolo_tiny/model.ckpt

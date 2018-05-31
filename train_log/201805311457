@@ -1,0 +1,93 @@
+2018-05-31 14:57:09,435 - net.py[line:809] - INFO: 开始训练:
+2018-05-31 14:57:11,321 - net.py[line:822] - INFO: 训练第1次,tota loss = 1679065350144.000000
+2018-05-31 14:57:11,321 - net.py[line:823] - INFO:     x_loss=0.000000, y_loss=0.000000, w_loss=0.000000, h_loss=0.000000
+2018-05-31 14:57:11,321 - net.py[line:824] - INFO:     class_probs_loss=0.000000,obj_confidence_loss=0.000000,noobj_confidence_loss=0.000000
+2018-05-31 14:57:11,321 - net.py[line:825] - INFO:     accuracy_x=0.000000, accuracy_y=0.000000, accuracy_w=0.000000, accuracy_h=0.000000
+2018-05-31 14:57:11,464 - net.py[line:822] - INFO: 训练第2次,tota loss = 488342913024.000000
+2018-05-31 14:57:11,464 - net.py[line:823] - INFO:     x_loss=0.000000, y_loss=0.000000, w_loss=0.000000, h_loss=0.000000
+2018-05-31 14:57:11,464 - net.py[line:824] - INFO:     class_probs_loss=0.000000,obj_confidence_loss=0.000000,noobj_confidence_loss=0.000000
+2018-05-31 14:57:11,464 - net.py[line:825] - INFO:     accuracy_x=0.000000, accuracy_y=0.000000, accuracy_w=0.000000, accuracy_h=0.000000
+2018-05-31 14:57:11,608 - net.py[line:822] - INFO: 训练第3次,tota loss = 112070475776.000000
+2018-05-31 14:57:11,608 - net.py[line:823] - INFO:     x_loss=0.000000, y_loss=0.000000, w_loss=0.000000, h_loss=0.000000
+2018-05-31 14:57:11,608 - net.py[line:824] - INFO:     class_probs_loss=0.000000,obj_confidence_loss=0.000000,noobj_confidence_loss=0.000000
+2018-05-31 14:57:11,608 - net.py[line:825] - INFO:     accuracy_x=0.000000, accuracy_y=0.000000, accuracy_w=0.000000, accuracy_h=0.000000
+2018-05-31 14:57:11,751 - net.py[line:822] - INFO: 训练第4次,tota loss = 28696627200.000000
+2018-05-31 14:57:11,751 - net.py[line:823] - INFO:     x_loss=0.000000, y_loss=0.000000, w_loss=0.000000, h_loss=0.000000
+2018-05-31 14:57:11,751 - net.py[line:824] - INFO:     class_probs_loss=0.000000,obj_confidence_loss=0.000000,noobj_confidence_loss=0.000000
+2018-05-31 14:57:11,751 - net.py[line:825] - INFO:     accuracy_x=0.000000, accuracy_y=0.000000, accuracy_w=0.000000, accuracy_h=0.000000
+2018-05-31 14:57:11,893 - net.py[line:822] - INFO: 训练第5次,tota loss = 22081701888.000000
+2018-05-31 14:57:11,894 - net.py[line:823] - INFO:     x_loss=0.000000, y_loss=0.000000, w_loss=0.000000, h_loss=0.000000
+2018-05-31 14:57:11,894 - net.py[line:824] - INFO:     class_probs_loss=0.000000,obj_confidence_loss=0.000000,noobj_confidence_loss=0.000000
+2018-05-31 14:57:11,894 - net.py[line:825] - INFO:     accuracy_x=0.000000, accuracy_y=0.000000, accuracy_w=0.000000, accuracy_h=0.000000
+2018-05-31 14:57:12,035 - net.py[line:822] - INFO: 训练第6次,tota loss = 17522831360.000000
+2018-05-31 14:57:12,035 - net.py[line:823] - INFO:     x_loss=0.000000, y_loss=0.000000, w_loss=0.000000, h_loss=0.000000
+2018-05-31 14:57:12,035 - net.py[line:824] - INFO:     class_probs_loss=0.000000,obj_confidence_loss=0.000000,noobj_confidence_loss=0.000000
+2018-05-31 14:57:12,035 - net.py[line:825] - INFO:     accuracy_x=0.000000, accuracy_y=0.000000, accuracy_w=0.000000, accuracy_h=0.000000
+2018-05-31 14:57:12,176 - net.py[line:822] - INFO: 训练第7次,tota loss = 14232927232.000000
+2018-05-31 14:57:12,176 - net.py[line:823] - INFO:     x_loss=0.000000, y_loss=0.000000, w_loss=0.000000, h_loss=0.000000
+2018-05-31 14:57:12,176 - net.py[line:824] - INFO:     class_probs_loss=0.000000,obj_confidence_loss=0.000000,noobj_confidence_loss=0.000000
+2018-05-31 14:57:12,176 - net.py[line:825] - INFO:     accuracy_x=0.000000, accuracy_y=0.000000, accuracy_w=0.000000, accuracy_h=0.000000
+2018-05-31 14:57:12,319 - net.py[line:822] - INFO: 训练第8次,tota loss = 10270702592.000000
+2018-05-31 14:57:12,319 - net.py[line:823] - INFO:     x_loss=0.000000, y_loss=0.000000, w_loss=0.000000, h_loss=0.000000
+2018-05-31 14:57:12,319 - net.py[line:824] - INFO:     class_probs_loss=0.000000,obj_confidence_loss=0.000000,noobj_confidence_loss=0.000000
+2018-05-31 14:57:12,319 - net.py[line:825] - INFO:     accuracy_x=0.000000, accuracy_y=0.000000, accuracy_w=0.000000, accuracy_h=0.000000
+2018-05-31 14:57:12,462 - net.py[line:822] - INFO: 训练第9次,tota loss = 7923900416.000000
+2018-05-31 14:57:12,462 - net.py[line:823] - INFO:     x_loss=0.000000, y_loss=0.000000, w_loss=0.000000, h_loss=0.000000
+2018-05-31 14:57:12,462 - net.py[line:824] - INFO:     class_probs_loss=0.000000,obj_confidence_loss=0.000000,noobj_confidence_loss=0.000000
+2018-05-31 14:57:12,462 - net.py[line:825] - INFO:     accuracy_x=0.000000, accuracy_y=0.000000, accuracy_w=0.000000, accuracy_h=0.000000
+2018-05-31 14:57:12,605 - net.py[line:822] - INFO: 训练第10次,tota loss = 6192896000.000000
+2018-05-31 14:57:12,605 - net.py[line:823] - INFO:     x_loss=0.000000, y_loss=0.000000, w_loss=0.000000, h_loss=0.000000
+2018-05-31 14:57:12,605 - net.py[line:824] - INFO:     class_probs_loss=0.000000,obj_confidence_loss=0.000000,noobj_confidence_loss=0.000000
+2018-05-31 14:57:12,605 - net.py[line:825] - INFO:     accuracy_x=0.000000, accuracy_y=0.000000, accuracy_w=0.000000, accuracy_h=0.000000
+2018-05-31 14:57:12,750 - net.py[line:822] - INFO: 训练第11次,tota loss = 4787187712.000000
+2018-05-31 14:57:12,750 - net.py[line:823] - INFO:     x_loss=0.000000, y_loss=0.000000, w_loss=0.000000, h_loss=0.000000
+2018-05-31 14:57:12,750 - net.py[line:824] - INFO:     class_probs_loss=0.000000,obj_confidence_loss=0.000000,noobj_confidence_loss=0.000000
+2018-05-31 14:57:12,750 - net.py[line:825] - INFO:     accuracy_x=0.000000, accuracy_y=0.000000, accuracy_w=0.000000, accuracy_h=0.000000
+2018-05-31 14:57:12,890 - net.py[line:822] - INFO: 训练第12次,tota loss = 4084687616.000000
+2018-05-31 14:57:12,890 - net.py[line:823] - INFO:     x_loss=0.000000, y_loss=0.000000, w_loss=0.000000, h_loss=0.000000
+2018-05-31 14:57:12,890 - net.py[line:824] - INFO:     class_probs_loss=0.000000,obj_confidence_loss=0.000000,noobj_confidence_loss=0.000000
+2018-05-31 14:57:12,890 - net.py[line:825] - INFO:     accuracy_x=0.000000, accuracy_y=0.000000, accuracy_w=0.000000, accuracy_h=0.000000
+2018-05-31 14:57:13,033 - net.py[line:822] - INFO: 训练第13次,tota loss = 3015216128.000000
+2018-05-31 14:57:13,033 - net.py[line:823] - INFO:     x_loss=0.000000, y_loss=0.000000, w_loss=0.000000, h_loss=0.000000
+2018-05-31 14:57:13,033 - net.py[line:824] - INFO:     class_probs_loss=0.000000,obj_confidence_loss=0.000000,noobj_confidence_loss=0.000000
+2018-05-31 14:57:13,033 - net.py[line:825] - INFO:     accuracy_x=0.000000, accuracy_y=0.000000, accuracy_w=0.000000, accuracy_h=0.000000
+2018-05-31 14:57:13,176 - net.py[line:822] - INFO: 训练第14次,tota loss = 2333329920.000000
+2018-05-31 14:57:13,176 - net.py[line:823] - INFO:     x_loss=0.000000, y_loss=0.000000, w_loss=0.000000, h_loss=0.000000
+2018-05-31 14:57:13,176 - net.py[line:824] - INFO:     class_probs_loss=0.000000,obj_confidence_loss=0.000000,noobj_confidence_loss=0.000000
+2018-05-31 14:57:13,176 - net.py[line:825] - INFO:     accuracy_x=0.000000, accuracy_y=0.000000, accuracy_w=0.000000, accuracy_h=0.000000
+2018-05-31 14:57:13,318 - net.py[line:822] - INFO: 训练第15次,tota loss = 1813320832.000000
+2018-05-31 14:57:13,318 - net.py[line:823] - INFO:     x_loss=0.000000, y_loss=0.000000, w_loss=0.000000, h_loss=0.000000
+2018-05-31 14:57:13,318 - net.py[line:824] - INFO:     class_probs_loss=0.000000,obj_confidence_loss=0.000000,noobj_confidence_loss=0.000000
+2018-05-31 14:57:13,319 - net.py[line:825] - INFO:     accuracy_x=0.000000, accuracy_y=0.000000, accuracy_w=0.000000, accuracy_h=0.000000
+2018-05-31 14:57:13,461 - net.py[line:822] - INFO: 训练第16次,tota loss = 1528563840.000000
+2018-05-31 14:57:13,461 - net.py[line:823] - INFO:     x_loss=0.000000, y_loss=0.000000, w_loss=0.000000, h_loss=0.000000
+2018-05-31 14:57:13,461 - net.py[line:824] - INFO:     class_probs_loss=0.000000,obj_confidence_loss=0.000000,noobj_confidence_loss=0.000000
+2018-05-31 14:57:13,461 - net.py[line:825] - INFO:     accuracy_x=0.000000, accuracy_y=0.000000, accuracy_w=0.000000, accuracy_h=0.000000
+2018-05-31 14:57:13,605 - net.py[line:822] - INFO: 训练第17次,tota loss = 1227746688.000000
+2018-05-31 14:57:13,606 - net.py[line:823] - INFO:     x_loss=0.000000, y_loss=0.000000, w_loss=0.000000, h_loss=0.000000
+2018-05-31 14:57:13,606 - net.py[line:824] - INFO:     class_probs_loss=0.000000,obj_confidence_loss=0.000000,noobj_confidence_loss=0.000000
+2018-05-31 14:57:13,607 - net.py[line:825] - INFO:     accuracy_x=0.000000, accuracy_y=0.000000, accuracy_w=0.000000, accuracy_h=0.000000
+2018-05-31 14:57:13,749 - net.py[line:822] - INFO: 训练第18次,tota loss = 1064428928.000000
+2018-05-31 14:57:13,750 - net.py[line:823] - INFO:     x_loss=0.000000, y_loss=0.000000, w_loss=0.000000, h_loss=0.000000
+2018-05-31 14:57:13,750 - net.py[line:824] - INFO:     class_probs_loss=0.000000,obj_confidence_loss=0.000000,noobj_confidence_loss=0.000000
+2018-05-31 14:57:13,750 - net.py[line:825] - INFO:     accuracy_x=0.000000, accuracy_y=0.000000, accuracy_w=0.000000, accuracy_h=0.000000
+2018-05-31 14:57:13,890 - net.py[line:822] - INFO: 训练第19次,tota loss = 905486784.000000
+2018-05-31 14:57:13,890 - net.py[line:823] - INFO:     x_loss=0.000000, y_loss=0.000000, w_loss=0.000000, h_loss=0.000000
+2018-05-31 14:57:13,890 - net.py[line:824] - INFO:     class_probs_loss=0.000000,obj_confidence_loss=0.000000,noobj_confidence_loss=0.000000
+2018-05-31 14:57:13,890 - net.py[line:825] - INFO:     accuracy_x=0.000000, accuracy_y=0.000000, accuracy_w=0.000000, accuracy_h=0.000000
+2018-05-31 14:57:14,033 - net.py[line:822] - INFO: 训练第20次,tota loss = 772923200.000000
+2018-05-31 14:57:14,033 - net.py[line:823] - INFO:     x_loss=0.000000, y_loss=0.000000, w_loss=0.000000, h_loss=0.000000
+2018-05-31 14:57:14,033 - net.py[line:824] - INFO:     class_probs_loss=0.000000,obj_confidence_loss=0.000000,noobj_confidence_loss=0.000000
+2018-05-31 14:57:14,033 - net.py[line:825] - INFO:     accuracy_x=0.000000, accuracy_y=0.000000, accuracy_w=0.000000, accuracy_h=0.000000
+2018-05-31 14:57:14,174 - net.py[line:822] - INFO: 训练第21次,tota loss = 664283392.000000
+2018-05-31 14:57:14,174 - net.py[line:823] - INFO:     x_loss=0.000000, y_loss=0.000000, w_loss=0.000000, h_loss=0.000000
+2018-05-31 14:57:14,174 - net.py[line:824] - INFO:     class_probs_loss=0.000000,obj_confidence_loss=0.000000,noobj_confidence_loss=0.000000
+2018-05-31 14:57:14,174 - net.py[line:825] - INFO:     accuracy_x=0.000000, accuracy_y=0.000000, accuracy_w=0.000000, accuracy_h=0.000000
+2018-05-31 14:57:14,315 - net.py[line:822] - INFO: 训练第22次,tota loss = 596565760.000000
+2018-05-31 14:57:14,315 - net.py[line:823] - INFO:     x_loss=0.000000, y_loss=0.000000, w_loss=0.000000, h_loss=0.000000
+2018-05-31 14:57:14,315 - net.py[line:824] - INFO:     class_probs_loss=0.000000,obj_confidence_loss=0.000000,noobj_confidence_loss=0.000000
+2018-05-31 14:57:14,315 - net.py[line:825] - INFO:     accuracy_x=0.000000, accuracy_y=0.000000, accuracy_w=0.000000, accuracy_h=0.000000
+2018-05-31 14:57:14,458 - net.py[line:822] - INFO: 训练第23次,tota loss = 516125248.000000
+2018-05-31 14:57:14,458 - net.py[line:823] - INFO:     x_loss=0.000000, y_loss=0.000000, w_loss=0.000000, h_loss=0.000000
+2018-05-31 14:57:14,458 - net.py[line:824] - INFO:     class_probs_loss=0.000000,obj_confidence_loss=0.000000,noobj_confidence_loss=0.000000
+2018-05-31 14:57:14,458 - net.py[line:825] - INFO:     accuracy_x=0.000000, accuracy_y=0.000000, accuracy_w=0.000000, accuracy_h=0.000000
