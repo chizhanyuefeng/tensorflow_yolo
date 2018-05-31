@@ -1,0 +1,7 @@
+2018-05-30 23:31:51,574 - net.py[line:792] - INFO: 开始训练:
+2018-05-30 23:32:07,110 - net.py[line:803] - INFO: 训练第100次,tota loss = nan
+2018-05-30 23:32:07,110 - net.py[line:804] - INFO:     x_loss=nan, y_loss=nan, w_loss=nan, h_loss=nan
+2018-05-30 23:32:07,110 - net.py[line:805] - INFO:     class_probs_loss=nan,obj_confidence_loss=nan,noobj_confidence_loss=nan
+2018-05-30 23:32:20,949 - net.py[line:803] - INFO: 训练第200次,tota loss = nan
+2018-05-30 23:32:20,950 - net.py[line:804] - INFO:     x_loss=nan, y_loss=nan, w_loss=nan, h_loss=nan
+2018-05-30 23:32:20,950 - net.py[line:805] - INFO:     class_probs_loss=nan,obj_confidence_loss=nan,noobj_confidence_loss=nan

@@ -1,0 +1,13 @@
+2018-05-30 20:55:25,724 - net.py[line:793] - INFO: 开始训练:
+2018-05-30 20:55:41,423 - net.py[line:804] - INFO: 训练第100次,tota loss = 38155.320312
+2018-05-30 20:55:41,423 - net.py[line:805] - INFO:     x_loss=788.273560, y_loss=350.488464, w_loss=1.548104, h_loss=1.250207
+2018-05-30 20:55:41,423 - net.py[line:806] - INFO:     class_probs_loss=14.000000,obj_confidence_loss=1510.440552,noobj_confidence_loss=35408.695312
+2018-05-30 20:55:55,355 - net.py[line:804] - INFO: 训练第200次,tota loss = 93.014786
+2018-05-30 20:55:55,355 - net.py[line:805] - INFO:     x_loss=0.011264, y_loss=0.000057, w_loss=1.548104, h_loss=1.250207
+2018-05-30 20:55:55,355 - net.py[line:806] - INFO:     class_probs_loss=11.000000,obj_confidence_loss=0.006145,noobj_confidence_loss=1.183108
+2018-05-30 20:56:09,306 - net.py[line:804] - INFO: 训练第300次,tota loss = 90.859749
+2018-05-30 20:56:09,306 - net.py[line:805] - INFO:     x_loss=0.004224, y_loss=0.002199, w_loss=1.548104, h_loss=1.282366
+2018-05-30 20:56:09,306 - net.py[line:806] - INFO:     class_probs_loss=11.000000,obj_confidence_loss=0.000834,noobj_confidence_loss=0.007797
+2018-05-30 20:56:23,256 - net.py[line:804] - INFO: 训练第400次,tota loss = 90.492607
+2018-05-30 20:56:23,257 - net.py[line:805] - INFO:     x_loss=0.005181, y_loss=0.001359, w_loss=1.548104, h_loss=1.282366
+2018-05-30 20:56:23,257 - net.py[line:806] - INFO:     class_probs_loss=11.000000,obj_confidence_loss=0.000656,noobj_confidence_loss=0.008105

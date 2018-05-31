@@ -1,5 +1,6 @@
 import numpy as np
-from src.yolo_net.net import Net
+#from src.yolo_net.net import Net
+from net import Net
 import tensorflow as tf
 
 class YoloTinyNet(Net):
@@ -12,19 +13,17 @@ class YoloTinyNet(Net):
         self._trainable = trainable
         self._construct_graph()
 
-
 if __name__ =='__main__':
-    tiny = YoloTinyNet(True)
+    # tiny = YoloTinyNet(trainable = False)
     # tiny.test('../../data/dog.jpg')
-    tiny.train()
+    # tiny = YoloTinyNet(trainable = True)
+    # tiny.train()
 
-    # a = tf.ones([20])
-    # sess = tf.Session()
-    # b = tf.Variable(tf.truncated_normal([2,2], stddev=0.1),
-    #                           dtype=tf.float32)
-    #
-    # sess.run(tf.global_variables_initializer())
-    #
-    # print(sess.run(b))
+    a = tf.constant(0,tf.float32)
+    sess = tf.Session()
+    b = 1/a
 
 
+    #sess.run(tf.global_variables_initializer())
+
+    print(sess.run(b))

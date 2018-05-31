@@ -1,0 +1,126 @@
+2018-05-29 17:04:28,258 - net.py[line:781] - INFO: 训练第100次,tota loss = 2232570.500000
+2018-05-29 17:04:28,258 - net.py[line:782] - INFO:     boxes_loss=8792.296875,class_probs_loss=1924498.250000,obj_confidence_loss=2764.430908,obj_confidence_loss=296431.937500
+2018-05-29 17:04:42,365 - net.py[line:781] - INFO: 训练第200次,tota loss = 376441.093750
+2018-05-29 17:04:42,365 - net.py[line:782] - INFO:     boxes_loss=1844.819092,class_probs_loss=326601.687500,obj_confidence_loss=1511.654297,obj_confidence_loss=46400.746094
+2018-05-29 17:04:56,488 - net.py[line:781] - INFO: 训练第300次,tota loss = 141015.093750
+2018-05-29 17:04:56,489 - net.py[line:782] - INFO:     boxes_loss=1780.606934,class_probs_loss=119272.210938,obj_confidence_loss=192.856567,obj_confidence_loss=19687.765625
+2018-05-29 17:05:10,605 - net.py[line:781] - INFO: 训练第400次,tota loss = 119246.968750
+2018-05-29 17:05:10,605 - net.py[line:782] - INFO:     boxes_loss=3222.259277,class_probs_loss=98185.562500,obj_confidence_loss=517.820679,obj_confidence_loss=17239.882812
+2018-05-29 17:05:24,747 - net.py[line:781] - INFO: 训练第500次,tota loss = 13143.453125
+2018-05-29 17:05:24,747 - net.py[line:782] - INFO:     boxes_loss=501.806152,class_probs_loss=11202.925781,obj_confidence_loss=75.011398,obj_confidence_loss=1282.333496
+2018-05-29 17:05:38,875 - net.py[line:781] - INFO: 训练第600次,tota loss = 158181.390625
+2018-05-29 17:05:38,876 - net.py[line:782] - INFO:     boxes_loss=12564.478516,class_probs_loss=128071.867188,obj_confidence_loss=108.063896,obj_confidence_loss=17355.626953
+2018-05-29 17:05:53,013 - net.py[line:781] - INFO: 训练第700次,tota loss = 4499.490234
+2018-05-29 17:05:53,013 - net.py[line:782] - INFO:     boxes_loss=413.532898,class_probs_loss=3520.782715,obj_confidence_loss=30.407724,obj_confidence_loss=453.419159
+2018-05-29 17:06:07,148 - net.py[line:781] - INFO: 训练第800次,tota loss = 944.217346
+2018-05-29 17:06:07,148 - net.py[line:782] - INFO:     boxes_loss=175.574097,class_probs_loss=622.255005,obj_confidence_loss=1.021796,obj_confidence_loss=64.020363
+2018-05-29 17:06:21,271 - net.py[line:781] - INFO: 训练第900次,tota loss = 312.335541
+2018-05-29 17:06:21,272 - net.py[line:782] - INFO:     boxes_loss=100.134918,class_probs_loss=116.090843,obj_confidence_loss=0.686421,obj_confidence_loss=14.077676
+2018-05-29 17:06:35,420 - net.py[line:781] - INFO: 训练第1000次,tota loss = 284.467712
+2018-05-29 17:06:35,420 - net.py[line:782] - INFO:     boxes_loss=173.795868,class_probs_loss=26.023102,obj_confidence_loss=0.061523,obj_confidence_loss=3.241624
+2018-05-29 17:06:44,500 - net.py[line:785] - INFO: 训练第1000次，权重保存至:/home/tony/learning_yolo/yolo_v1/tensorflow_yolo_v1.git/weights/yolo_tiny/model.ckpt
+2018-05-29 17:06:58,635 - net.py[line:781] - INFO: 训练第1100次,tota loss = 196.074142
+2018-05-29 17:06:58,635 - net.py[line:782] - INFO:     boxes_loss=103.895668,class_probs_loss=10.093554,obj_confidence_loss=0.010503,obj_confidence_loss=0.728863
+2018-05-29 17:07:12,772 - net.py[line:781] - INFO: 训练第1200次,tota loss = 191.217117
+2018-05-29 17:07:12,772 - net.py[line:782] - INFO:     boxes_loss=97.638062,class_probs_loss=11.100100,obj_confidence_loss=0.008314,obj_confidence_loss=1.125024
+2018-05-29 17:07:26,892 - net.py[line:781] - INFO: 训练第1300次,tota loss = 1416.312134
+2018-05-29 17:07:26,893 - net.py[line:782] - INFO:     boxes_loss=1326.039551,class_probs_loss=8.204464,obj_confidence_loss=0.023526,obj_confidence_loss=0.699002
+2018-05-29 17:07:41,027 - net.py[line:781] - INFO: 训练第1400次,tota loss = 451.637238
+2018-05-29 17:07:41,027 - net.py[line:782] - INFO:     boxes_loss=359.407104,class_probs_loss=9.980661,obj_confidence_loss=0.021616,obj_confidence_loss=0.882299
+2018-05-29 17:07:55,156 - net.py[line:781] - INFO: 训练第1500次,tota loss = 279.109436
+2018-05-29 17:07:55,157 - net.py[line:782] - INFO:     boxes_loss=187.227249,class_probs_loss=9.629674,obj_confidence_loss=0.033637,obj_confidence_loss=0.873280
+2018-05-29 17:08:09,323 - net.py[line:781] - INFO: 训练第1600次,tota loss = 114.600685
+2018-05-29 17:08:09,323 - net.py[line:782] - INFO:     boxes_loss=24.283459,class_probs_loss=8.476076,obj_confidence_loss=0.021224,obj_confidence_loss=0.474347
+2018-05-29 17:08:23,489 - net.py[line:781] - INFO: 训练第1700次,tota loss = 248.495544
+2018-05-29 17:08:23,489 - net.py[line:782] - INFO:     boxes_loss=153.884064,class_probs_loss=11.898059,obj_confidence_loss=0.052865,obj_confidence_loss=1.314996
+2018-05-29 17:08:37,636 - net.py[line:781] - INFO: 训练第1800次,tota loss = 210.843491
+2018-05-29 17:08:37,637 - net.py[line:782] - INFO:     boxes_loss=117.831467,class_probs_loss=10.690156,obj_confidence_loss=0.020958,obj_confidence_loss=0.955342
+2018-05-29 17:08:51,773 - net.py[line:781] - INFO: 训练第1900次,tota loss = 282.215149
+2018-05-29 17:08:51,773 - net.py[line:782] - INFO:     boxes_loss=189.942276,class_probs_loss=10.021605,obj_confidence_loss=0.022286,obj_confidence_loss=0.883391
+2018-05-29 17:09:05,925 - net.py[line:781] - INFO: 训练第2000次,tota loss = 301.123993
+2018-05-29 17:09:05,925 - net.py[line:782] - INFO:     boxes_loss=206.410217,class_probs_loss=11.975552,obj_confidence_loss=0.033252,obj_confidence_loss=1.359380
+2018-05-29 17:09:14,288 - net.py[line:785] - INFO: 训练第2000次，权重保存至:/home/tony/learning_yolo/yolo_v1/tensorflow_yolo_v1.git/weights/yolo_tiny/model.ckpt
+2018-05-29 17:09:28,608 - net.py[line:781] - INFO: 训练第2100次,tota loss = 384.756256
+2018-05-29 17:09:28,608 - net.py[line:782] - INFO:     boxes_loss=286.522736,class_probs_loss=14.916790,obj_confidence_loss=0.156833,obj_confidence_loss=1.814322
+2018-05-29 17:09:42,765 - net.py[line:781] - INFO: 训练第2200次,tota loss = 562.284607
+2018-05-29 17:09:42,765 - net.py[line:782] - INFO:     boxes_loss=462.100769,class_probs_loss=16.377327,obj_confidence_loss=0.053188,obj_confidence_loss=2.407725
+2018-05-29 17:09:56,924 - net.py[line:781] - INFO: 训练第2300次,tota loss = 391.998016
+2018-05-29 17:09:56,924 - net.py[line:782] - INFO:     boxes_loss=299.830872,class_probs_loss=9.956957,obj_confidence_loss=0.017127,obj_confidence_loss=0.847480
+2018-05-29 17:10:11,081 - net.py[line:781] - INFO: 训练第2400次,tota loss = 339.939362
+2018-05-29 17:10:11,081 - net.py[line:782] - INFO:     boxes_loss=243.694031,class_probs_loss=13.304003,obj_confidence_loss=0.119308,obj_confidence_loss=1.476425
+2018-05-29 17:10:25,235 - net.py[line:781] - INFO: 训练第2500次,tota loss = 709.555786
+2018-05-29 17:10:25,235 - net.py[line:782] - INFO:     boxes_loss=609.561279,class_probs_loss=16.448231,obj_confidence_loss=0.064279,obj_confidence_loss=2.136406
+2018-05-29 17:10:39,369 - net.py[line:781] - INFO: 训练第2600次,tota loss = 333.619263
+2018-05-29 17:10:39,369 - net.py[line:782] - INFO:     boxes_loss=237.745361,class_probs_loss=13.197334,obj_confidence_loss=0.072116,obj_confidence_loss=1.258877
+2018-05-29 17:10:53,503 - net.py[line:781] - INFO: 训练第2700次,tota loss = 360.159241
+2018-05-29 17:10:53,503 - net.py[line:782] - INFO:     boxes_loss=264.312103,class_probs_loss=12.918058,obj_confidence_loss=0.062197,obj_confidence_loss=1.521298
+2018-05-29 17:11:07,654 - net.py[line:781] - INFO: 训练第2800次,tota loss = 218.570663
+2018-05-29 17:11:07,654 - net.py[line:782] - INFO:     boxes_loss=122.609558,class_probs_loss=13.368825,obj_confidence_loss=0.015149,obj_confidence_loss=1.231566
+2018-05-29 17:11:21,811 - net.py[line:781] - INFO: 训练第2900次,tota loss = 269.623566
+2018-05-29 17:11:21,812 - net.py[line:782] - INFO:     boxes_loss=173.336441,class_probs_loss=13.289402,obj_confidence_loss=0.004717,obj_confidence_loss=1.647438
+2018-05-29 17:11:35,970 - net.py[line:781] - INFO: 训练第3000次,tota loss = 229.534042
+2018-05-29 17:11:35,970 - net.py[line:782] - INFO:     boxes_loss=128.257431,class_probs_loss=17.642559,obj_confidence_loss=0.065578,obj_confidence_loss=2.222923
+2018-05-29 17:11:45,996 - net.py[line:785] - INFO: 训练第3000次，权重保存至:/home/tony/learning_yolo/yolo_v1/tensorflow_yolo_v1.git/weights/yolo_tiny/model.ckpt
+2018-05-29 17:12:00,151 - net.py[line:781] - INFO: 训练第3100次,tota loss = 436.756622
+2018-05-29 17:12:00,151 - net.py[line:782] - INFO:     boxes_loss=334.758362,class_probs_loss=17.969654,obj_confidence_loss=0.109812,obj_confidence_loss=2.573216
+2018-05-29 17:12:14,318 - net.py[line:781] - INFO: 训练第3200次,tota loss = 187.622345
+2018-05-29 17:12:14,318 - net.py[line:782] - INFO:     boxes_loss=85.679657,class_probs_loss=18.898521,obj_confidence_loss=0.027507,obj_confidence_loss=1.671103
+2018-05-29 17:12:28,473 - net.py[line:781] - INFO: 训练第3300次,tota loss = 411.096588
+2018-05-29 17:12:28,473 - net.py[line:782] - INFO:     boxes_loss=306.185272,class_probs_loss=20.923601,obj_confidence_loss=0.133341,obj_confidence_loss=2.508770
+2018-05-29 17:12:42,626 - net.py[line:781] - INFO: 训练第3400次,tota loss = 360.322510
+2018-05-29 17:12:42,626 - net.py[line:782] - INFO:     boxes_loss=257.142365,class_probs_loss=19.670015,obj_confidence_loss=0.115815,obj_confidence_loss=2.048723
+2018-05-29 17:12:56,777 - net.py[line:781] - INFO: 训练第3500次,tota loss = 272.666107
+2018-05-29 17:12:56,778 - net.py[line:782] - INFO:     boxes_loss=163.645569,class_probs_loss=24.109756,obj_confidence_loss=0.063669,obj_confidence_loss=3.501553
+2018-05-29 17:13:10,943 - net.py[line:781] - INFO: 训练第3600次,tota loss = 406.211792
+2018-05-29 17:13:10,943 - net.py[line:782] - INFO:     boxes_loss=294.410126,class_probs_loss=26.266045,obj_confidence_loss=0.063072,obj_confidence_loss=4.126948
+2018-05-29 17:13:25,092 - net.py[line:781] - INFO: 训练第3700次,tota loss = 412.633148
+2018-05-29 17:13:25,092 - net.py[line:782] - INFO:     boxes_loss=299.604218,class_probs_loss=28.234203,obj_confidence_loss=0.055667,obj_confidence_loss=3.393501
+2018-05-29 17:13:39,249 - net.py[line:781] - INFO: 训练第3800次,tota loss = 233.637466
+2018-05-29 17:13:39,249 - net.py[line:782] - INFO:     boxes_loss=130.561981,class_probs_loss=19.276831,obj_confidence_loss=0.007692,obj_confidence_loss=2.445414
+2018-05-29 17:13:53,397 - net.py[line:781] - INFO: 训练第3900次,tota loss = 232.416367
+2018-05-29 17:13:53,397 - net.py[line:782] - INFO:     boxes_loss=127.989029,class_probs_loss=20.422710,obj_confidence_loss=0.147502,obj_confidence_loss=2.511560
+2018-05-29 17:14:07,534 - net.py[line:781] - INFO: 训练第4000次,tota loss = 466.691101
+2018-05-29 17:14:07,534 - net.py[line:782] - INFO:     boxes_loss=350.283020,class_probs_loss=30.919920,obj_confidence_loss=0.064302,obj_confidence_loss=4.078276
+2018-05-29 17:14:16,041 - net.py[line:785] - INFO: 训练第4000次，权重保存至:/home/tony/learning_yolo/yolo_v1/tensorflow_yolo_v1.git/weights/yolo_tiny/model.ckpt
+2018-05-29 17:14:31,535 - net.py[line:781] - INFO: 训练第4100次,tota loss = 364.828094
+2018-05-29 17:14:31,535 - net.py[line:782] - INFO:     boxes_loss=249.713470,class_probs_loss=29.448074,obj_confidence_loss=0.157530,obj_confidence_loss=4.163430
+2018-05-29 17:14:45,678 - net.py[line:781] - INFO: 训练第4200次,tota loss = 627.218262
+2018-05-29 17:14:45,678 - net.py[line:782] - INFO:     boxes_loss=517.842896,class_probs_loss=24.348221,obj_confidence_loss=0.185110,obj_confidence_loss=3.496484
+2018-05-29 17:14:59,828 - net.py[line:781] - INFO: 训练第4300次,tota loss = 492.086365
+2018-05-29 17:14:59,828 - net.py[line:782] - INFO:     boxes_loss=368.077271,class_probs_loss=37.175465,obj_confidence_loss=0.260803,obj_confidence_loss=5.227238
+2018-05-29 17:15:13,987 - net.py[line:781] - INFO: 训练第4400次,tota loss = 698.955811
+2018-05-29 17:15:13,987 - net.py[line:782] - INFO:     boxes_loss=578.894897,class_probs_loss=34.134033,obj_confidence_loss=0.206384,obj_confidence_loss=4.374885
+2018-05-29 17:15:28,144 - net.py[line:781] - INFO: 训练第4500次,tota loss = 292.696838
+2018-05-29 17:15:28,144 - net.py[line:782] - INFO:     boxes_loss=165.031570,class_probs_loss=40.452507,obj_confidence_loss=0.081968,obj_confidence_loss=5.785233
+2018-05-29 17:15:42,291 - net.py[line:781] - INFO: 训练第4600次,tota loss = 437.020599
+2018-05-29 17:15:42,291 - net.py[line:782] - INFO:     boxes_loss=295.190186,class_probs_loss=49.959137,obj_confidence_loss=0.454799,obj_confidence_loss=10.070899
+2018-05-29 17:15:56,477 - net.py[line:781] - INFO: 训练第4700次,tota loss = 4843499008.000000
+2018-05-29 17:15:56,478 - net.py[line:782] - INFO:     boxes_loss=240925088.000000,class_probs_loss=3843868416.000000,obj_confidence_loss=11595356.000000,obj_confidence_loss=747110208.000000
+2018-05-29 17:16:10,669 - net.py[line:781] - INFO: 训练第4800次,tota loss = 183954.109375
+2018-05-29 17:16:10,669 - net.py[line:782] - INFO:     boxes_loss=1466.984375,class_probs_loss=161095.296875,obj_confidence_loss=150.995163,obj_confidence_loss=21159.097656
+2018-05-29 17:16:24,850 - net.py[line:781] - INFO: 训练第4900次,tota loss = 61208.750000
+2018-05-29 17:16:24,850 - net.py[line:782] - INFO:     boxes_loss=230.708771,class_probs_loss=53272.535156,obj_confidence_loss=31.002409,obj_confidence_loss=7592.776367
+2018-05-29 17:16:39,030 - net.py[line:781] - INFO: 训练第5000次,tota loss = 31631.603516
+2018-05-29 17:16:39,030 - net.py[line:782] - INFO:     boxes_loss=282.940155,class_probs_loss=27044.222656,obj_confidence_loss=25.907068,obj_confidence_loss=4196.806641
+2018-05-29 17:16:48,318 - net.py[line:785] - INFO: 训练第5000次，权重保存至:/home/tony/learning_yolo/yolo_v1/tensorflow_yolo_v1.git/weights/yolo_tiny/model.ckpt
+2018-05-29 17:17:03,984 - net.py[line:781] - INFO: 训练第5100次,tota loss = 18661.404297
+2018-05-29 17:17:03,984 - net.py[line:782] - INFO:     boxes_loss=77.252991,class_probs_loss=15962.536133,obj_confidence_loss=13.182303,obj_confidence_loss=2526.704346
+2018-05-29 17:17:18,136 - net.py[line:781] - INFO: 训练第5200次,tota loss = 11961.935547
+2018-05-29 17:17:18,136 - net.py[line:782] - INFO:     boxes_loss=62.101727,class_probs_loss=10164.389648,obj_confidence_loss=10.803293,obj_confidence_loss=1642.911621
+2018-05-29 17:17:32,273 - net.py[line:781] - INFO: 训练第5300次,tota loss = 8104.083984
+2018-05-29 17:17:32,274 - net.py[line:782] - INFO:     boxes_loss=55.305115,class_probs_loss=6844.500000,obj_confidence_loss=9.123678,obj_confidence_loss=1113.425171
+2018-05-29 17:17:46,417 - net.py[line:781] - INFO: 训练第5400次,tota loss = 5667.707520
+2018-05-29 17:17:46,417 - net.py[line:782] - INFO:     boxes_loss=24.845091,class_probs_loss=4767.441406,obj_confidence_loss=7.120145,obj_confidence_loss=786.570923
+2018-05-29 17:18:00,563 - net.py[line:781] - INFO: 训练第5500次,tota loss = 4015.079590
+2018-05-29 17:18:00,564 - net.py[line:782] - INFO:     boxes_loss=18.976131,class_probs_loss=3344.844482,obj_confidence_loss=4.172671,obj_confidence_loss=565.356567
+2018-05-29 17:18:14,721 - net.py[line:781] - INFO: 训练第5600次,tota loss = 2868.542969
+2018-05-29 17:18:14,722 - net.py[line:782] - INFO:     boxes_loss=13.834449,class_probs_loss=2365.462402,obj_confidence_loss=3.124818,obj_confidence_loss=404.391479
+2018-05-29 17:18:28,886 - net.py[line:781] - INFO: 训练第5700次,tota loss = 2074.492920
+2018-05-29 17:18:28,886 - net.py[line:782] - INFO:     boxes_loss=10.376908,class_probs_loss=1685.122192,obj_confidence_loss=2.051623,obj_confidence_loss=295.212341
+2018-05-29 17:18:43,070 - net.py[line:781] - INFO: 训练第5800次,tota loss = 1510.261353
+2018-05-29 17:18:43,070 - net.py[line:782] - INFO:     boxes_loss=7.980343,class_probs_loss=1206.901245,obj_confidence_loss=1.810259,obj_confidence_loss=211.839722
+2018-05-29 17:18:57,249 - net.py[line:781] - INFO: 训练第5900次,tota loss = 1100.965332
+2018-05-29 17:18:57,249 - net.py[line:782] - INFO:     boxes_loss=5.890932,class_probs_loss=860.862061,obj_confidence_loss=1.130435,obj_confidence_loss=151.352020
+2018-05-29 17:19:11,434 - net.py[line:781] - INFO: 训练第6000次,tota loss = 808.055786
+2018-05-29 17:19:11,434 - net.py[line:782] - INFO:     boxes_loss=4.397149,class_probs_loss=612.114502,obj_confidence_loss=0.558911,obj_confidence_loss=109.255440
+2018-05-29 17:19:22,470 - net.py[line:785] - INFO: 训练第6000次，权重保存至:/home/tony/learning_yolo/yolo_v1/tensorflow_yolo_v1.git/weights/yolo_tiny/model.ckpt
