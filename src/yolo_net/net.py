@@ -612,22 +612,22 @@ class Net(object):
 
         '''将预测的boxes数据转为绝对数据'''
         cell_length = self._input_size / self._cell_size
-        predict_absolute_boxes = predict_boxes * [cell_length, cell_length, self._input_size, self._input_size]
-        coord_size = np.zeros([7, 7, 4])
+        predict_absolute_boxes = tf.multiply(predict_boxes, [cell_length, cell_length, self._input_size, self._input_size], name='predict_absolute_boxes1')
+        coord_size = np.zeros([7, 7, 4], np.float32)
 
-        for i in range(self._cell_size):
-            for j in range(self._cell_size):
-                coord_size[i, j, :] = [j*cell_length, i*cell_length, 0, 0]
+        for y in range(self._cell_size):
+            for x in range(self._cell_size):
+                coord_size[y, x, :] = [x*cell_length, y*cell_length, 0, 0]
         # 将shape扩充为[7,7,2,4]
         coord_size = np.tile(coord_size.reshape([7, 7, 1, 4]), [1, 1, self._boxes_per_cell, 1])
-        predict_absolute_boxes = predict_absolute_boxes + coord_size
+        predict_absolute_boxes = tf.add(predict_absolute_boxes, coord_size, name='predict_absolute_boxes')
 
         '''计算iou shape=[7,7,2]'''
 
         iou = self.__train_iou(predict_absolute_boxes, label)
         #iou = tf.reshape(iou, (7, 7, 2))
         with tf.name_scope('iou_iou'):
-            iou = iou * 1
+            iou = iou * 1.0
 
         '''找到对应物体负责（response）的格子的iou '''
         response = tf.reshape(response, (7, 7, 1), name='response')
@@ -639,6 +639,7 @@ class Net(object):
         # max_I :shape=(7,7,1),更新完后的I只有一个值不为0，即为response的最大iou值
         with tf.name_scope('I'):
             max_I = tf.reduce_max(I, axis=2, keep_dims=True, name='max_I')
+            C_I = I * max_I
             I = tf.cast(I >= max_I, tf.float32) * response
             no_I = 1 - I
 
@@ -652,10 +653,14 @@ class Net(object):
         predict_probs = classes_probs
 
         '''提取label数据用于计算loss'''
-        label_x = label[0] % (self._input_size / self._cell_size)
-        label_y = label[1] % (self._input_size / self._cell_size)
-        label_w = label[2] / self._input_size
-        label_h = label[3] / self._input_size
+        with tf.name_scope('label_x'):
+            label_x = label[0] % cell_length / cell_length
+        with tf.name_scope('label_y'):
+            label_y = label[1] % cell_length / cell_length
+        with tf.name_scope('label_w'):
+            label_w = label[2] / self.  _input_size
+        with tf.name_scope('label_h'):
+            label_h = label[3] / self._input_size
         label_probs = tf.one_hot(tf.cast(label[4], tf.int32), self._classes_num, dtype=tf.float32)
 
         '''计算准确率'''
@@ -663,9 +668,18 @@ class Net(object):
         accuracy_y = tf.reduce_sum(I * (predict_y / label_y)) / 2.0
         accuracy_w = tf.reduce_sum(I * (predict_w / label_w)) / 2.0
         accuracy_h = tf.reduce_sum(I * (predict_h / label_h)) / 2.0
+        accuracy_c = 0#tf.where(I) * predict_confidences) / 2.0
 
         accuracy = [accuracy[0] + accuracy_x, accuracy[1] + accuracy_y,
-                    accuracy[2] + accuracy_w, accuracy[3] + accuracy_h]
+                    accuracy[2] + accuracy_w, accuracy[3] + accuracy_h,
+                    accuracy[4] + accuracy_c]
+
+        '''debug'''
+        debug_predict_x = tf.multiply(I, predict_x, name='predict_x')
+        debug_predict_y = tf.multiply(I, predict_y, name='predict_y')
+        debug_predict_w = tf.multiply(I, predict_w, name='predict_w')
+        debug_predict_h = tf.multiply(I, predict_h, name='predict_h')
+        debug_predict_c = tf.multiply(I, predict_confidences, name='predict_c')
 
         '''计算loss'''
         class_probs_loss = tf.nn.l2_loss(object_cells * (predict_probs - label_probs)) * self.__class_scale
@@ -702,13 +716,13 @@ class Net(object):
                             predict[:, :, :, 1] - predict[:, :, :, 3] / 2, # 左上角y
                             predict[:, :, :, 0] + predict[:, :, :, 2] / 2, # 右下角x
                             predict[:, :, :, 1] + predict[:, :, :, 3] / 2], # 右下角y
-                           axis=3, name='predict_bbox')
+                        axis=3,name='predict_bbox')
 
         label = tf.stack([label[0] - label[2] / 2, # 左上角x
                           label[1] - label[3] / 2, # 左上角y
                           label[0] + label[2] / 2, # 右下角x
-                          label[1] + label[3] / 2],
-                         name='label_bbox') # 右下角y
+                          label[1] + label[3] / 2] # 右下角y
+                         ,name='label_bbox')
 
         left_max_coord = tf.maximum(predict[:, :, :, 0:2], label[0:2])
         right_min_coord = tf.minimum(predict[:, :, :, 2:], label[2:])
@@ -746,9 +760,10 @@ class Net(object):
         accuracy_y = tf.constant(0, tf.float32)
         accuracy_w = tf.constant(0, tf.float32)
         accuracy_h = tf.constant(0, tf.float32)
+        accuracy_c = tf.constant(0, tf.float32)
 
         losses = [tf.constant(0.0)] * 7
-        total_accuracy = [tf.constant(0.0, tf.float32)] * 4
+        total_accuracy = [tf.constant(0.0, tf.float32)] * 5
         # 对每个batch分别进行进算loss
         for i in range(self.__batch_size):
             predict = self._net_output[i]
@@ -756,7 +771,7 @@ class Net(object):
             object_num = self.__labels_objects_num[i][0]
 
             loss = [x_loss, y_loss, w_loss, h_loss, class_probs_loss, obj_confidence_loss, noobj_confidence_loss]
-            accuracy = [accuracy_x, accuracy_y, accuracy_w, accuracy_h]
+            accuracy = [accuracy_x, accuracy_y, accuracy_w, accuracy_h, accuracy_c]
             loop_vars = [tf.constant(0), object_num, loss, label, predict, accuracy]
 
             # 对一张图片label包含的物体，分别进行计算loss
@@ -765,7 +780,8 @@ class Net(object):
                       losses[4] + output[2][4], losses[5] + output[2][5], losses[6] + output[2][6]]
             num = tf.cast(object_num,tf.float32)
             total_accuracy = [total_accuracy[0] + output[5][0]/num, total_accuracy[1] + output[5][1]/num,
-                              total_accuracy[2] + output[5][2]/num, total_accuracy[3] + output[5][3]/num]
+                              total_accuracy[2] + output[5][2]/num, total_accuracy[3] + output[5][3]/num,
+                              total_accuracy[4] + output[5][4]/num]
 
         avg_losses = tf.reduce_sum(losses) / self.__batch_size
         tf.add_to_collection('losses', avg_losses)
@@ -782,6 +798,7 @@ class Net(object):
         self.accuracy_y = total_accuracy[1]
         self.accuracy_w = total_accuracy[2]
         self.accuracy_h = total_accuracy[3]
+        self.accuracy_c = total_accuracy[4]
 
         return tf.add_n(tf.get_collection('losses'))
 
@@ -814,16 +831,16 @@ class Net(object):
 
             feed_dict = {self._image_input_tensor: image_input, self.__labels: labels, self.__labels_objects_num: [[1]]}
             run = [train_option, self.__total_losses, self.x_loss,self.y_loss,self.w_loss,self.h_loss, self.class_probs_loss, self.obj_confidence_loss, self.noobj_confidence_loss,
-                   self.accuracy_x, self.accuracy_y, self.accuracy_w, self.accuracy_h]
+                   self.accuracy_x, self.accuracy_y, self.accuracy_w, self.accuracy_h, self.accuracy_c]
 
             _, loss, x_loss, y_loss, w_loss, h_loss, class_probs_loss, obj_confidence_loss, noobj_confidence_loss, \
-            accuracy_x, accuracy_y, accuracy_w, accuracy_h = sess.run(run, feed_dict=feed_dict)
+            accuracy_x, accuracy_y, accuracy_w, accuracy_h, accuracy_c = sess.run(run, feed_dict=feed_dict)
 
             if (step+1) % 100 == 0:
                 self.train_logger.info('训练第%d次,tota loss = %f'%(step+1, loss))
                 self.train_logger.info('    x_loss=%f, y_loss=%f, w_loss=%f, h_loss=%f'%(x_loss, y_loss, w_loss, h_loss))
                 self.train_logger.info('    class_probs_loss=%f,obj_confidence_loss=%f,noobj_confidence_loss=%f'%(class_probs_loss, obj_confidence_loss, noobj_confidence_loss))
-                self.train_logger.info('    accuracy_x=%f, accuracy_y=%f, accuracy_w=%f, accuracy_h=%f'%(accuracy_x, accuracy_y, accuracy_w, accuracy_h))
+                self.train_logger.info('    accuracy_x=%f, accuracy_y=%f, accuracy_w=%f, accuracy_h=%f,accuracy_c=%f'%(accuracy_x, accuracy_y, accuracy_w, accuracy_h,accuracy_c))
             if (step+1) % 1000 == 0:
                 save_path = saver.save(sess, self.__model_save_path)
                 self.train_logger.info("训练第%d次，权重保存至:%s" % (step+1, save_path))
