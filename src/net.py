@@ -1,5 +1,5 @@
 import sys
-sys.path.append("../..")
+sys.path.append("../")
 import time
 import cv2
 import numpy as np
@@ -41,7 +41,7 @@ class Net(object):
             self._sess = tf.Session()
         return self._sess
 
-    def _conv2d_layer(self,name,input,kernel_size,channels,filters,stride,activate_fc='leaky'):
+    def _conv2d_layer(self, name, input, kernel_size, channels, filters, stride, activate_fc='leaky'):
         '''
         卷积层，采用leaky作为激活函数
         :param name:
@@ -66,7 +66,7 @@ class Net(object):
 
         return self._activate_func(layer_output, activate_fc)
 
-    def _activate_func(self,x,name):
+    def _activate_func(self, x, name):
         '''
         激活函数leaky，见yolo_v1论文
         if x >0:
@@ -85,7 +85,7 @@ class Net(object):
 
         return out_put
 
-    def _max_pooling_layer(self,name,input,kernel_size,stride):
+    def _max_pooling_layer(self, name, input, kernel_size, stride):
         '''
         最大池化层，采用边缘检测
         :param name:
@@ -97,7 +97,7 @@ class Net(object):
         with tf.name_scope(name):
             return tf.nn.max_pool(input,[1,kernel_size,kernel_size,1],strides=stride,padding='SAME')
 
-    def _fc_layer(self,name,input,input_size,output_size,activate_fc):
+    def _fc_layer(self, name, input, input_size, output_size, activate_fc):
         '''
         全连接层
         :param name:
@@ -135,7 +135,7 @@ class Net(object):
 
         return layer_output
 
-    def _variable_weights(self,shape):
+    def _variable_weights(self, shape):
         '''
 
         如果进行训练，则需要加上权值衰减
@@ -170,7 +170,7 @@ class Net(object):
         self.train_logger.setLevel(logging.DEBUG)
 
         # 添加文件输出
-        log_file = '../../train_log/' + time.strftime('%Y%m%d%H%M', time.localtime(time.time()))
+        log_file = './train_log/' + time.strftime('%Y%m%d%H%M', time.localtime(time.time()))
         file_handler = logging.FileHandler(log_file, mode='w')
         file_handler.setLevel(logging.DEBUG)
         file_formatter = logging.Formatter('%(asctime)s - %(filename)s[line:%(lineno)d] - %(levelname)s: %(message)s')
@@ -553,7 +553,7 @@ class Net(object):
         # apply_gradient_op = train_option.apply_gradients(grads)
         return train_option
 
-    def __cond(self,num,object_num,loss,labels,predict,accuracy):
+    def __cond(self, num, object_num, loss, labels, predict):
         """
         循环的条件函数
         :param num: 当前执行的次数
@@ -566,7 +566,7 @@ class Net(object):
 
         return num < object_num
 
-    def __body(self, num, object_num, loss, labels, predict, accuracy):
+    def __body(self, num, object_num, loss, labels, predict):
         '''
         循环的执行函数
         :param num: 当前执行的次数
@@ -623,11 +623,7 @@ class Net(object):
         predict_absolute_boxes = tf.add(predict_absolute_boxes, coord_size, name='predict_absolute_boxes')
 
         '''计算iou shape=[7,7,2]'''
-
         iou = self.__train_iou(predict_absolute_boxes, label)
-        #iou = tf.reshape(iou, (7, 7, 2))
-        with tf.name_scope('iou_iou'):
-            iou = iou * 1.0
 
         '''找到对应物体负责（response）的格子的iou '''
         response = tf.reshape(response, (7, 7, 1), name='response')
@@ -639,7 +635,6 @@ class Net(object):
         # max_I :shape=(7,7,1),更新完后的I只有一个值不为0，即为response的最大iou值
         with tf.name_scope('I'):
             max_I = tf.reduce_max(I, axis=2, keep_dims=True, name='max_I')
-            C_I = I * max_I
             I = tf.cast(I >= max_I, tf.float32) * response
             no_I = 1 - I
 
@@ -658,28 +653,10 @@ class Net(object):
         with tf.name_scope('label_y'):
             label_y = label[1] % cell_length / cell_length
         with tf.name_scope('label_w'):
-            label_w = label[2] / self.  _input_size
+            label_w = label[2] / self._input_size
         with tf.name_scope('label_h'):
             label_h = label[3] / self._input_size
         label_probs = tf.one_hot(tf.cast(label[4], tf.int32), self._classes_num, dtype=tf.float32)
-
-        '''计算准确率'''
-        accuracy_x = tf.reduce_sum(I * (predict_x / label_x)) / 2.0
-        accuracy_y = tf.reduce_sum(I * (predict_y / label_y)) / 2.0
-        accuracy_w = tf.reduce_sum(I * (predict_w / label_w)) / 2.0
-        accuracy_h = tf.reduce_sum(I * (predict_h / label_h)) / 2.0
-        accuracy_c = 0#tf.where(I) * predict_confidences) / 2.0
-
-        accuracy = [accuracy[0] + accuracy_x, accuracy[1] + accuracy_y,
-                    accuracy[2] + accuracy_w, accuracy[3] + accuracy_h,
-                    accuracy[4] + accuracy_c]
-
-        '''debug'''
-        debug_predict_x = tf.multiply(I, predict_x, name='predict_x')
-        debug_predict_y = tf.multiply(I, predict_y, name='predict_y')
-        debug_predict_w = tf.multiply(I, predict_w, name='predict_w')
-        debug_predict_h = tf.multiply(I, predict_h, name='predict_h')
-        debug_predict_c = tf.multiply(I, predict_confidences, name='predict_c')
 
         '''计算loss'''
         class_probs_loss = tf.nn.l2_loss(object_cells * (predict_probs - label_probs)) * self.__class_scale
@@ -702,7 +679,7 @@ class Net(object):
                   loss[6] + noobj_confidences_loss]
         num = num+1
 
-        return num, object_num, losses, labels, predict, accuracy
+        return num, object_num, losses, labels, predict
 
     def __train_iou(self, predict, label):
         '''
@@ -746,8 +723,6 @@ class Net(object):
         计算网络的loss
         :return:
         '''
-
-        #boxes_loss = tf.constant(0, tf.float32)
         x_loss = tf.constant(0, tf.float32)
         y_loss = tf.constant(0, tf.float32)
         w_loss = tf.constant(0, tf.float32)
@@ -756,14 +731,7 @@ class Net(object):
         obj_confidence_loss = tf.constant(0, tf.float32)
         noobj_confidence_loss = tf.constant(0, tf.float32)
 
-        accuracy_x = tf.constant(0, tf.float32)
-        accuracy_y = tf.constant(0, tf.float32)
-        accuracy_w = tf.constant(0, tf.float32)
-        accuracy_h = tf.constant(0, tf.float32)
-        accuracy_c = tf.constant(0, tf.float32)
-
         losses = [tf.constant(0.0)] * 7
-        total_accuracy = [tf.constant(0.0, tf.float32)] * 5
         # 对每个batch分别进行进算loss
         for i in range(self.__batch_size):
             predict = self._net_output[i]
@@ -771,17 +739,12 @@ class Net(object):
             object_num = self.__labels_objects_num[i][0]
 
             loss = [x_loss, y_loss, w_loss, h_loss, class_probs_loss, obj_confidence_loss, noobj_confidence_loss]
-            accuracy = [accuracy_x, accuracy_y, accuracy_w, accuracy_h, accuracy_c]
-            loop_vars = [tf.constant(0), object_num, loss, label, predict, accuracy]
+            loop_vars = [tf.constant(0), object_num, loss, label, predict]
 
             # 对一张图片label包含的物体，分别进行计算loss
             output = tf.while_loop(self.__cond, self.__body, loop_vars=loop_vars)
             losses = [losses[0] + output[2][0], losses[1] + output[2][1], losses[2] + output[2][2], losses[3] + output[2][3],
                       losses[4] + output[2][4], losses[5] + output[2][5], losses[6] + output[2][6]]
-            num = tf.cast(object_num,tf.float32)
-            total_accuracy = [total_accuracy[0] + output[5][0]/num, total_accuracy[1] + output[5][1]/num,
-                              total_accuracy[2] + output[5][2]/num, total_accuracy[3] + output[5][3]/num,
-                              total_accuracy[4] + output[5][4]/num]
 
         avg_losses = tf.reduce_sum(losses) / self.__batch_size
         tf.add_to_collection('losses', avg_losses)
@@ -793,15 +756,7 @@ class Net(object):
         self.obj_confidence_loss = losses[5]
         self.noobj_confidence_loss = losses[6]
 
-        #total_accuracy = total_accuracy / tf.cast(self.__batch_size, tf.float32)
-        self.accuracy_x = total_accuracy[0]
-        self.accuracy_y = total_accuracy[1]
-        self.accuracy_w = total_accuracy[2]
-        self.accuracy_h = total_accuracy[3]
-        self.accuracy_c = total_accuracy[4]
-
         return tf.add_n(tf.get_collection('losses'))
-
 
     def train(self):
         '''
@@ -813,13 +768,13 @@ class Net(object):
         labels = np.zeros((1, 20, 5), np.float32)
 
         labels[:, 0] = [108.1, 269.1, 114.9, 248.1, 11]
-        #labels[:, 1] = [308.0, 81.4, 130.0, 85.6, 6]
-        #labels[:, 2] = [145.2, 191.2, 261.9, 227.9, 1]
+        labels[:, 1] = [308.0, 81.4, 130.0, 85.6, 6]
+        labels[:, 2] = [145.2, 191.2, 261.9, 227.9, 1]
         self.__total_losses = self.__loss()
 
         train_option = self.__train_optimize(self.__total_losses)
 
-        image_input = self.img2yoloimg('../../data/dog.jpg')
+        image_input = self.img2yoloimg('./data/dog.jpg')
         sess = self.__get_session()
         sess.run(tf.global_variables_initializer())
 
@@ -829,18 +784,17 @@ class Net(object):
 
         for step in range(self.__max_iterators):
 
-            feed_dict = {self._image_input_tensor: image_input, self.__labels: labels, self.__labels_objects_num: [[1]]}
-            run = [train_option, self.__total_losses, self.x_loss,self.y_loss,self.w_loss,self.h_loss, self.class_probs_loss, self.obj_confidence_loss, self.noobj_confidence_loss,
-                   self.accuracy_x, self.accuracy_y, self.accuracy_w, self.accuracy_h, self.accuracy_c]
+            feed_dict = {self._image_input_tensor: image_input, self.__labels: labels, self.__labels_objects_num: [[3]]}
 
-            _, loss, x_loss, y_loss, w_loss, h_loss, class_probs_loss, obj_confidence_loss, noobj_confidence_loss, \
-            accuracy_x, accuracy_y, accuracy_w, accuracy_h, accuracy_c = sess.run(run, feed_dict=feed_dict)
+            run = [train_option, self.__total_losses, self.x_loss,self.y_loss, self.w_loss,self.h_loss,
+                   self.class_probs_loss, self.obj_confidence_loss, self.noobj_confidence_loss]
+
+            _, loss, x_loss, y_loss, w_loss, h_loss, class_probs_loss, obj_confidence_loss, noobj_confidence_loss = sess.run(run, feed_dict=feed_dict)
 
             if (step+1) % 100 == 0:
                 self.train_logger.info('训练第%d次,tota loss = %f'%(step+1, loss))
                 self.train_logger.info('    x_loss=%f, y_loss=%f, w_loss=%f, h_loss=%f'%(x_loss, y_loss, w_loss, h_loss))
                 self.train_logger.info('    class_probs_loss=%f,obj_confidence_loss=%f,noobj_confidence_loss=%f'%(class_probs_loss, obj_confidence_loss, noobj_confidence_loss))
-                self.train_logger.info('    accuracy_x=%f, accuracy_y=%f, accuracy_w=%f, accuracy_h=%f,accuracy_c=%f'%(accuracy_x, accuracy_y, accuracy_w, accuracy_h,accuracy_c))
             if (step+1) % 1000 == 0:
                 save_path = saver.save(sess, self.__model_save_path)
                 self.train_logger.info("训练第%d次，权重保存至:%s" % (step+1, save_path))

@@ -21,7 +21,7 @@ def make_label(img_height, img_width, labels):
         width = (label[2] - label[0]) * width_scale
         x = (label[0] + width / 2) * width_scale
         y = (label[1] + height / 2) * height_scale
-        yolo_label.append([x,y,width,height,label[4]])
+        yolo_label.append([x, y, width, height, label[4]])
 
     return yolo_label
 

@@ -1,5 +1,0 @@
-2018-05-31 14:52:44,248 - net.py[line:809] - INFO: 开始训练:
-2018-05-31 14:53:00,371 - net.py[line:822] - INFO: 训练第100次,tota loss = 4044124.750000
-2018-05-31 14:53:00,371 - net.py[line:823] - INFO:     x_loss=0.000000, y_loss=0.000000, w_loss=0.000000, h_loss=0.000000
-2018-05-31 14:53:00,372 - net.py[line:824] - INFO:     class_probs_loss=0.000000,obj_confidence_loss=0.000000,noobj_confidence_loss=0.000000
-2018-05-31 14:53:00,372 - net.py[line:825] - INFO:     accuracy_x=0.000000, accuracy_y=0.000000, accuracy_w=0.000000, accuracy_h=0.000000
