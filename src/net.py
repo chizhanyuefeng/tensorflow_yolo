@@ -477,8 +477,12 @@ class Net(object):
         '''
 
         # 计算bbox的1/2的宽度和高度
-        half_bw = self._image_width * bbox[2] * bbox[2] / 2
-        half_bh = self._image_height * bbox[3] * bbox[3] / 2
+        if not self.WIGHTS_NAME:
+            half_bw = self._image_width * bbox[2] * bbox[2] / 2
+            half_bh = self._image_height * bbox[3] * bbox[3] / 2
+        else:
+            half_bw = self._image_width * bbox[2] / 2
+            half_bh = self._image_height * bbox[3] / 2
 
         # 计算原始大小的图片每个cell的宽和高
         cell_width = self._image_width/self._cell_size
@@ -768,8 +772,8 @@ class Net(object):
         labels = np.zeros((1, 20, 5), np.float32)
 
         labels[:, 0] = [108.1, 269.1, 114.9, 248.1, 11]
-        labels[:, 1] = [308.0, 81.4, 130.0, 85.6, 6]
-        labels[:, 2] = [145.2, 191.2, 261.9, 227.9, 1]
+        #labels[:, 1] = [308.0, 81.4, 130.0, 85.6, 6]
+        #labels[:, 2] = [145.2, 191.2, 261.9, 227.9, 1]
         self.__total_losses = self.__loss()
 
         train_option = self.__train_optimize(self.__total_losses)
@@ -784,7 +788,7 @@ class Net(object):
 
         for step in range(self.__max_iterators):
 
-            feed_dict = {self._image_input_tensor: image_input, self.__labels: labels, self.__labels_objects_num: [[3]]}
+            feed_dict = {self._image_input_tensor: image_input, self.__labels: labels, self.__labels_objects_num: [[1]]}
 
             run = [train_option, self.__total_losses, self.x_loss,self.y_loss, self.w_loss,self.h_loss,
                    self.class_probs_loss, self.obj_confidence_loss, self.noobj_confidence_loss]

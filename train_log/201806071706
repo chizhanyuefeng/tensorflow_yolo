@@ -1,0 +1,35 @@
+2018-06-07 17:06:18,152 - net.py[line:782] - INFO: 开始训练:
+2018-06-07 17:06:33,752 - net.py[line:795] - INFO: 训练第100次,tota loss = 179848.953125
+2018-06-07 17:06:33,752 - net.py[line:796] - INFO:     x_loss=60.813786, y_loss=596.226868, w_loss=33.366283, h_loss=1950.973999
+2018-06-07 17:06:33,752 - net.py[line:797] - INFO:     class_probs_loss=116208.210938,obj_confidence_loss=220.828049,noobj_confidence_loss=60696.445312
+2018-06-07 17:06:47,725 - net.py[line:795] - INFO: 训练第200次,tota loss = 86.401581
+2018-06-07 17:06:47,725 - net.py[line:796] - INFO:     x_loss=0.006253, y_loss=0.063834, w_loss=0.000881, h_loss=0.032594
+2018-06-07 17:06:47,725 - net.py[line:797] - INFO:     class_probs_loss=4.583442,obj_confidence_loss=0.182473,noobj_confidence_loss=1.490449
+2018-06-07 17:07:01,706 - net.py[line:795] - INFO: 训练第300次,tota loss = 79.281807
+2018-06-07 17:07:01,706 - net.py[line:796] - INFO:     x_loss=0.000621, y_loss=0.000993, w_loss=0.000379, h_loss=0.000178
+2018-06-07 17:07:01,706 - net.py[line:797] - INFO:     class_probs_loss=0.017777,obj_confidence_loss=0.000221,noobj_confidence_loss=0.003920
+2018-06-07 17:07:15,684 - net.py[line:795] - INFO: 训练第400次,tota loss = 78.982323
+2018-06-07 17:07:15,685 - net.py[line:796] - INFO:     x_loss=0.000199, y_loss=0.000085, w_loss=0.000005, h_loss=0.000022
+2018-06-07 17:07:15,685 - net.py[line:797] - INFO:     class_probs_loss=0.008249,obj_confidence_loss=0.001993,noobj_confidence_loss=0.001611
+2018-06-07 17:07:29,672 - net.py[line:795] - INFO: 训练第500次,tota loss = 79.173393
+2018-06-07 17:07:29,672 - net.py[line:796] - INFO:     x_loss=0.000163, y_loss=0.000869, w_loss=0.007288, h_loss=0.000482
+2018-06-07 17:07:29,672 - net.py[line:797] - INFO:     class_probs_loss=0.251983,obj_confidence_loss=0.000004,noobj_confidence_loss=0.040857
+2018-06-07 17:07:43,654 - net.py[line:795] - INFO: 训练第600次,tota loss = 1397100.500000
+2018-06-07 17:07:43,654 - net.py[line:796] - INFO:     x_loss=367.185944, y_loss=2765.413818, w_loss=15869.442383, h_loss=9452.175781
+2018-06-07 17:07:43,654 - net.py[line:797] - INFO:     class_probs_loss=1195408.750000,obj_confidence_loss=248.829193,noobj_confidence_loss=172909.734375
+2018-06-07 17:07:57,649 - net.py[line:795] - INFO: 训练第700次,tota loss = 210.412201
+2018-06-07 17:07:57,649 - net.py[line:796] - INFO:     x_loss=7.284729, y_loss=1.053439, w_loss=3.862988, h_loss=4.968983
+2018-06-07 17:07:57,649 - net.py[line:797] - INFO:     class_probs_loss=99.626518,obj_confidence_loss=0.642292,noobj_confidence_loss=14.141493
+2018-06-07 17:08:11,642 - net.py[line:795] - INFO: 训练第800次,tota loss = 78.887314
+2018-06-07 17:08:11,642 - net.py[line:796] - INFO:     x_loss=0.001515, y_loss=0.000080, w_loss=0.007817, h_loss=0.000008
+2018-06-07 17:08:11,642 - net.py[line:797] - INFO:     class_probs_loss=0.040971,obj_confidence_loss=0.000557,noobj_confidence_loss=0.006861
+2018-06-07 17:08:25,631 - net.py[line:795] - INFO: 训练第900次,tota loss = 78.895035
+2018-06-07 17:08:25,631 - net.py[line:796] - INFO:     x_loss=0.000102, y_loss=0.000364, w_loss=0.000144, h_loss=0.001411
+2018-06-07 17:08:25,631 - net.py[line:797] - INFO:     class_probs_loss=0.055470,obj_confidence_loss=0.000045,noobj_confidence_loss=0.008504
+2018-06-07 17:08:39,621 - net.py[line:795] - INFO: 训练第1000次,tota loss = 78.872360
+2018-06-07 17:08:39,621 - net.py[line:796] - INFO:     x_loss=0.000034, y_loss=0.000100, w_loss=0.001955, h_loss=0.000000
+2018-06-07 17:08:39,621 - net.py[line:797] - INFO:     class_probs_loss=0.035572,obj_confidence_loss=0.000486,noobj_confidence_loss=0.005328
+2018-06-07 17:08:51,010 - net.py[line:800] - INFO: 训练第1000次，权重保存至:./weights/yolo_tiny/model.ckpt
+2018-06-07 17:09:05,021 - net.py[line:795] - INFO: 训练第1100次,tota loss = 16878550.000000
+2018-06-07 17:09:05,021 - net.py[line:796] - INFO:     x_loss=1790.223511, y_loss=3956.170898, w_loss=93055.968750, h_loss=36853.648438
+2018-06-07 17:09:05,021 - net.py[line:797] - INFO:     class_probs_loss=14343584.000000,obj_confidence_loss=10208.495117,noobj_confidence_loss=2389023.500000

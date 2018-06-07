@@ -6,7 +6,8 @@
 - Run
 
 
-    python run.py --download_model=True
+
+    python run.py --download_model=True --test_img=IMG_PATH
 
 ## 2.Train and test you data
 

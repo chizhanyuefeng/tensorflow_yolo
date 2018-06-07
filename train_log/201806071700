@@ -26,3 +26,7 @@
 2018-06-07 17:02:38,245 - net.py[line:795] - INFO: 训练第900次,tota loss = 300.647430
 2018-06-07 17:02:38,245 - net.py[line:796] - INFO:     x_loss=0.702268, y_loss=1.200315, w_loss=0.929464, h_loss=2.220591
 2018-06-07 17:02:38,246 - net.py[line:797] - INFO:     class_probs_loss=188.548294,obj_confidence_loss=0.528218,noobj_confidence_loss=25.187189
+2018-06-07 17:02:52,537 - net.py[line:795] - INFO: 训练第1000次,tota loss = 93.241371
+2018-06-07 17:02:52,537 - net.py[line:796] - INFO:     x_loss=0.000497, y_loss=0.005192, w_loss=0.079344, h_loss=0.088661
+2018-06-07 17:02:52,537 - net.py[line:797] - INFO:     class_probs_loss=10.823936,obj_confidence_loss=0.136874,noobj_confidence_loss=0.775874
+2018-06-07 17:03:06,626 - net.py[line:800] - INFO: 训练第1000次，权重保存至:./weights/yolo_tiny/model.ckpt
