@@ -1,11 +1,19 @@
 # yolo_v1(tensorflow)
-##1.Test the yolo net
 
-you should configure the yolo net.
+## 1.Test yolo using trained model
+- [Download the tiny yolo model](https://drive.google.com/file/d/0B2JbaJSrWLpza0FtQlc3ejhMTTA/view?usp=sharing)
+- Put the model to ./weights/yolo_tiny/YOLO_tiny.ckpt
 
-##2.Train the net 
+## 2.Train and test you data
 
-working
+### Train the tiny yolo
 
-##3.Download the model
+    python run.py --train=True
 
+### Test 
+
+    python run.py --test_img=IMG_PATH
+
+## 3.Notice
+现在只能train一张图片，因为并没有完善从其他数据集获取batch来进行训练。
+有待完善。 2018.6.7记
