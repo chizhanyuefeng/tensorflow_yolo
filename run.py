@@ -9,8 +9,12 @@ flags.DEFINE_string('test_img', './data/dog.jpg', 'where the test image is store
 flags.DEFINE_bool('debug', False, 'If need to debug?True or False')
 FLAGS = flags.FLAGS
 
-
 def main(_):
+    """
+    执行函数
+    :param _:
+    :return:
+    """
     if FLAGS.train:
         yolo = YoloTinyNet(True)
         yolo.train()
