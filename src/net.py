@@ -9,12 +9,12 @@ from tensorflow.python import debug as tf_debug
 import logging
 from tensorflow.python import pywrap_tensorflow
 
-WIGHTS_NAME = 1
-
 class Net(object):
     '''
     Base Net class
     '''
+
+    WIGHTS_NAME = True
 
     _trainable = False
     _cfg_file_path = None
@@ -52,7 +52,7 @@ class Net(object):
         :param activate_fc:
         :return:
         '''
-        if WIGHTS_NAME:
+        if self.WIGHTS_NAME:
             with tf.name_scope(name):
                 wights = self._variable_weights([kernel_size,kernel_size,channels,filters])
                 biases = self._variable_biases([filters])
@@ -103,7 +103,7 @@ class Net(object):
         :param name:
         :return:
         '''
-        if WIGHTS_NAME:
+        if self.WIGHTS_NAME:
             with tf.name_scope(name):
                 weights = self._variable_weights([input_size,output_size])
                 biases = self._variable_biases([output_size])
@@ -210,7 +210,7 @@ class Net(object):
         # 初始化train log
         self.train_logger_init()
 
-    def _construct_graph(self):
+    def _inference(self):
         '''
         构建网络tensor graph
         :return:
@@ -289,7 +289,7 @@ class Net(object):
 
         #self.__get_session().run(tf.global_variables_initializer())
         self._model_saver = tf.train.Saver()
-        self._model_saver.restore(self.__get_session(),self._model_path)
+        self._model_saver.restore(self.__get_session(), self._model_path)
 
     def img2yoloimg(self,image_path):
         '''
@@ -337,7 +337,7 @@ class Net(object):
         if not result:
             return
         else:
-            result_classes, result_bboxes, result_scores =result
+            result_classes, result_bboxes, result_scores = result
 
         # 展示结果
         self.__show_result(result_classes, result_bboxes, result_scores)
@@ -477,8 +477,8 @@ class Net(object):
         '''
 
         # 计算bbox的1/2的宽度和高度
-        half_bw = self._image_width * bbox[2] / 2
-        half_bh = self._image_height * bbox[3] / 2
+        half_bw = self._image_width * bbox[2] * bbox[2] / 2
+        half_bh = self._image_height * bbox[3] * bbox[3] / 2
 
         # 计算原始大小的图片每个cell的宽和高
         cell_width = self._image_width/self._cell_size

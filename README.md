@@ -2,7 +2,11 @@
 
 ## 1.Test yolo using trained model
 - [Download the tiny yolo model](https://drive.google.com/file/d/0B2JbaJSrWLpza0FtQlc3ejhMTTA/view?usp=sharing)
-- Put the model to ./weights/yolo_tiny/YOLO_tiny.ckpt
+- Put the model to ./weights/YOLO_tiny.ckpt
+- Run
+
+
+    python run.py --download_model=True
 
 ## 2.Train and test you data
 
