@@ -1,24 +1,31 @@
-# yolo_v1(tensorflow)
+# You Only Look Once: Unified, Real-Time Object Detection
+Using tensorflow to complete the yolo train and test
 
-## 1.Test yolo using trained model
+## Requirenments
+- python3
+- tensorflow 1.4.0
+- pandas
+- numpy
+- matplotlib
+
+## Test yolo using trained model
 - [Download the tiny yolo model](https://drive.google.com/file/d/0B2JbaJSrWLpza0FtQlc3ejhMTTA/view?usp=sharing)
 - Put the model to ./weights/YOLO_tiny.ckpt
 - Run
 
 
-
     python run.py --download_model=True --test_img=IMG_PATH
 
-## 2.Train and test you data
+## Train and test you data
 
-### Train the tiny yolo
+### 1.Train the tiny yolo
 
     python run.py --train=True
 
-### Test 
+### 2.Test 
 
     python run.py --test_img=IMG_PATH
 
-## 3.Notice
+## Notice
 现在只能train一张图片，因为并没有完善从其他数据集获取batch来进行训练。
 有待完善。 2018.6.7记
