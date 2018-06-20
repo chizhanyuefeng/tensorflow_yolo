@@ -1,6 +1,12 @@
 # You Only Look Once: Unified, Real-Time Object Detection
 Using tensorflow to complete the yolo train and test
 
+
+## Notice
+Now I have no time to add get_batch() fuctions,so I only use one
+picture to train the model. When I'm training the model,loss will be descend and accuracy is coming to 100%.
+Training own dataset will be coming.
+
 ## Requirenments
 - python3
 - tensorflow 1.4.0
